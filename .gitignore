@@ -1,0 +1,39 @@
+# Environment variables with secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Backup files
+*.bak
+*.gz
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker (keep Dockerfile but ignore images)
+*.tar
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# CodeBuddy
+.codebuddy/
+
+# Playwright CLI logs
+.playwright-cli/
