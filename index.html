@@ -39,6 +39,11 @@
     }
 
     /* ========== Top Nav ========== */
+    .header-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
     .topnav {
       background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
       padding: 12px 28px;
@@ -47,9 +52,6 @@
       justify-content: space-between;
       color: #fff;
       box-shadow: 0 2px 12px rgba(0,0,0,.15);
-      position: sticky;
-      top: 0;
-      z-index: 100;
       flex-wrap: wrap;
       gap: 12px;
     }
@@ -119,6 +121,24 @@
     .btn-refresh:active { transform: scale(.97); }
     .btn-refresh.spinning .refresh-icon { animation: spin .6s ease-in-out; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-coldstart {
+      background: rgba(255,255,255,.12);
+      color: #bfdbfe;
+      border: 1px solid rgba(191,219,254,.35);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .btn-coldstart:hover {
+      background: rgba(191,219,254,.18);
+      border-color: rgba(191,219,254,.55);
+      color: #fff;
+    }
+    .btn-coldstart:active { transform: scale(.97); }
 
     /* Toggle Switch */
     .toggle-container {
@@ -163,18 +183,31 @@
     .toggle-hint {
       font-size: 11px;
       opacity: .6;
-      display: none;
     }
+    .insights-toggle-btn {
+      padding: 6px 14px;
+      border: 2px solid rgba(255,255,255,.35);
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .insights-toggle-btn:hover { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.55); }
+    .insights-toggle-btn.hidden-insights { opacity: .55; }
 
     /* ========== Banner ========== */
     .banner {
       margin: 0;
-      padding: 14px 28px;
-      font-size: 14px;
+      padding: 8px 28px;
+      font-size: 13px;
       font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       transition: all .4s;
     }
     .banner.new-user {
@@ -192,20 +225,24 @@
     /* ========== Main Content ========== */
     .main-content {
       flex: 1;
-      max-width: 1400px;
       width: 100%;
       margin: 0 auto;
-      padding: 24px 24px 16px;
+      padding: 10px 16px;
       display: grid;
-      gap: 24px;
+      gap: 10px;
       transition: all .4s;
     }
     .main-content.single-col {
       grid-template-columns: 1fr;
-      max-width: 800px;
+      max-width: 960px;
     }
     .main-content.dual-col {
+      grid-template-columns: 1fr 1fr minmax(280px, 340px);
+      max-width: 2200px;
+    }
+    .main-content.two-col {
       grid-template-columns: 1fr 1fr;
+      max-width: 1600px;
     }
 
     /* ========== Column ========== */
@@ -217,12 +254,89 @@
       display: flex;
       flex-direction: column;
     }
-    .col-header {
-      padding: 16px 20px;
+    /* Insights (third) column */
+    .insights-panel {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .insights-header {
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .insights-algo-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #ede9fe;
+      color: #6d28d9;
+      white-space: nowrap;
+    }
+    .insights-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 10px;
+      max-height: calc(100vh - 240px);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .insight-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 11px;
+    }
+    .insight-card .insight-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 6px;
+    }
+    .insight-coverage {
+      display: flex; flex-wrap: wrap; gap: 6px; font-size: 10px;
+    }
+    .insight-coverage .coverage-item {
+      display: flex; align-items: center; gap: 4px;
+    }
+    .insight-coverage .coverage-val {
+      font-weight: 700; color: var(--primary);
+    }
+    .insight-coverage .coverage-delta {
+      font-size: 9px; border-radius: 3px; padding: 1px 4px;
+    }
+    .insight-coverage .coverage-delta.up { background: #d1fae5; color: #059669; }
+    .insight-coverage .coverage-delta.down { background: #fee2e2; color: #dc2626; }
+    .col-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .col-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
     }
     .col-title {
       font-size: 16px;
@@ -230,6 +344,16 @@
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+    .col-subtitle {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 400;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 4px;
     }
     .col-badge {
       font-size: 11px;
@@ -254,8 +378,8 @@
     .col-body {
       flex: 1;
       overflow-y: auto;
-      padding: 16px 20px;
-      max-height: calc(100vh - 280px);
+      padding: 8px 12px;
+      max-height: calc(100vh - 240px);
     }
 
     /* ========== News Card ========== */
@@ -263,13 +387,13 @@
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 16px;
-      margin-bottom: 12px;
+      padding: 6px 8px;
+      margin-bottom: 5px;
       cursor: pointer;
-      transition: all .2s;
+      transition: all .15s;
       position: relative;
       display: flex;
-      gap: 14px;
+      gap: 8px;
     }
     .news-card:hover {
       border-color: var(--primary-light);
@@ -282,9 +406,9 @@
       background: #f8faff;
     }
     .card-thumb {
-      width: 100px;
-      height: 72px;
-      border-radius: 6px;
+      width: 56px;
+      height: 40px;
+      border-radius: 4px;
       object-fit: cover;
       flex-shrink: 0;
       background: #e5e7eb;
@@ -294,62 +418,62 @@
       min-width: 0;
     }
     .card-title {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
-      line-height: 1.4;
-      margin-bottom: 6px;
+      line-height: 1.35;
+      margin-bottom: 2px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
     .card-summary {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-secondary);
-      line-height: 1.5;
+      line-height: 1.4;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     .card-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
       flex-wrap: wrap;
     }
     .card-source {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       color: var(--text-secondary);
     }
     .card-lean {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 10px;
+      padding: 1px 6px;
+      border-radius: 8px;
       letter-spacing: .02em;
     }
     .card-lean.P { background: var(--progressive-bg); color: var(--progressive); }
     .card-lean.B { background: var(--balanced-bg); color: var(--balanced); }
     .card-lean.T { background: var(--traditional-bg); color: var(--traditional); }
     .card-time {
-      font-size: 11px;
+      font-size: 10px;
       color: #9ca3af;
     }
     .card-rank {
       position: absolute;
-      top: 8px;
-      right: 10px;
-      font-size: 10px;
+      top: 4px;
+      right: 6px;
+      font-size: 9px;
       font-weight: 700;
       color: #d1d5db;
     }
     .card-score-bar {
-      margin-top: 6px;
-      height: 3px;
-      border-radius: 2px;
+      margin-top: 3px;
+      height: 2px;
+      border-radius: 1px;
       background: #e5e7eb;
       overflow: hidden;
     }
@@ -361,6 +485,94 @@
     .card-score-fill.high { background: #10b981; }
     .card-score-fill.mid { background: #f59e0b; }
     .card-score-fill.low { background: #d1d5db; }
+
+    /* ========== Card Rich Info ========== */
+    .card-info-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+      align-items: center;
+    }
+    .card-info-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      white-space: nowrap;
+    }
+    .card-perspective { font-weight: 600; font-size: 10px; }
+    .card-perspective.L { color: #3b82f6; }
+    .card-perspective.C { color: #8b5cf6; }
+    .card-perspective.R { color: #ef4444; }
+    .card-gain {
+      color: #10b981;
+      font-weight: 600;
+      font-size: 10px;
+    }
+    .card-cluster {
+      background: #f3f4f6;
+      color: #6b7280;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 9px;
+    }
+    .card-reason {
+      font-size: 9px;
+      color: #9ca3af;
+      margin-top: 2px;
+      font-style: italic;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      cursor: help;
+    }
+    .card-reason:hover {
+      -webkit-line-clamp: unset;
+      color: var(--text-secondary);
+    }
+    .news-card.reranked .card-reason {
+      color: #6366f1;
+      font-style: normal;
+    }
+
+    /* ========== Card Tooltip ========== */
+    .card-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: #f9fafb;
+      font-size: 11px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      max-width: 260px;
+      line-height: 1.5;
+      z-index: 100;
+      white-space: normal;
+      text-align: left;
+      box-shadow: 0 4px 12px rgba(0,0,0,.25);
+      pointer-events: none;
+    }
+    .card-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: #1f2937;
+    }
+    .news-card.reranked:hover .card-tooltip,
+    .news-card.reranked.tooltip-visible .card-tooltip {
+      display: block;
+    }
+    .news-card.reranked { position: relative; }
 
     /* ========== Empty State ========== */
     .empty-state {
@@ -387,7 +599,7 @@
       animation: spin 1s linear infinite;
     }
 
-    /* ========== Onboarding Modal ========== */
+    /* ========== Onboarding Carousel ========== */
     .onboarding-overlay {
       position: fixed; top:0;left:0;width:100%;height:100%;
       background: rgba(0,0,0,.5); z-index:999;
@@ -395,28 +607,67 @@
     }
     .onboarding-overlay.hidden { display: none; }
     .onboarding-modal {
-      background: #fff; border-radius: 16px; padding: 32px;
-      max-width: 560px; width: 90%; max-height: 80vh; overflow-y: auto;
+      background: #fff; border-radius: 16px; padding: 0;
+      max-width: 600px; width: 92%; height: 520px;
       box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      display: flex; flex-direction: column; overflow: hidden;
+      position: relative;
     }
-    .onboarding-step { display: none; }
-    .onboarding-step.active { display: block; }
-    .onboarding-title {
-      font-size: 20px; font-weight: 700; margin-bottom: 8px;
+    /* Carousel track */
+    .onb-track {
+      flex: 1; display: flex; transition: transform .4s cubic-bezier(0.4,0,0.2,1);
+      will-change: transform;
+    }
+    .onb-slide {
+      min-width: 100%; padding: 28px 32px 16px;
+      overflow-y: auto; box-sizing: border-box;
+    }
+    .onb-slide-title {
+      font-size: 20px; font-weight: 700; margin-bottom: 4px;
       color: var(--text);
     }
-    .onboarding-subtitle {
-      font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;
+    .onb-slide-sub {
+      font-size: 13px; color: var(--text-secondary); margin-bottom: 18px;
     }
-    .onboarding-progress {
-      display: flex; gap: 8px; margin-bottom: 24px;
+    /* Nav arrows */
+    .onb-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #fff; border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: var(--text); z-index: 10;
+      transition: all .2s; user-select: none;
     }
-    .onboarding-step-dot {
-      flex:1; height: 4px; border-radius: 2px; background: #e5e7eb;
-      transition: background .3s;
+    .onb-nav:hover { background: #f0f0ff; border-color: var(--primary-light); }
+    .onb-nav:disabled { opacity: .3; cursor: default; background: #fff; }
+    .onb-nav.prev { left: -18px; }
+    .onb-nav.next { right: -18px; }
+    /* Bottom bar */
+    .onb-bottom {
+      display: flex; align-items: center; padding: 12px 32px 20px;
+      justify-content: space-between; gap: 12px;
+      border-top: 1px solid #f0f0f0;
     }
-    .onboarding-step-dot.done { background: var(--primary); }
-    .onboarding-step-dot.active { background: var(--primary-light); }
+    .onb-dots {
+      display: flex; gap: 6px;
+    }
+    .onb-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #d1d5db; transition: all .3s;
+    }
+    .onb-dot.active { background: var(--primary); width: 24px; border-radius: 4px; }
+    .onb-dot.done { background: #a5b4fc; }
+    .onb-btn {
+      padding: 10px 24px; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s;
+    }
+    .onb-btn:hover { opacity: .9; transform: translateY(-1px); }
+    .onb-btn:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+    .onb-btn-primary { background: var(--primary); color: #fff; }
+    .onb-btn-secondary { background: #fff; color: var(--primary); border: 2px solid var(--primary); }
+    .onb-btn-ghost { background: transparent; color: var(--text-secondary); padding: 10px 16px; }
+    .onb-btn-ghost:hover { color: var(--text); }
     .tag-grid {
       display: grid; grid-template-columns: repeat(2,1fr);
       gap: 10px; margin-bottom: 16px;
@@ -512,20 +763,22 @@
     .phase-label.explore { background: #dbeafe; color: #1e40af; }
     .phase-label.hybrid { background: #ede9fe; color: #5b21b6; }
     .phase-label.personalized { background: #d1fae5; color: #065f46; }
+    .phase-percent-text { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
 
-    /* ========== Bandit Stats ========== */
-    .bandit-panel {
-      margin-top: 12px; padding: 12px 16px; background: #f8fafc;
-      border-radius: 8px; border: 1px solid var(--border);
-      display: none;
+    /* Phase bar wrapper (now inside insights panel) */
+    .phase-bar {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
     }
-    .bandit-panel.visible { display: block; }
-    .bandit-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-    .bandit-arms { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    /* ========== Bandit Stats (inline) ========== */
+    .bandit-arms { display: flex; flex-wrap: wrap; gap: 4px; }
     .bandit-arm {
-      padding: 4px 10px; border-radius: 6px; font-size: 11px;
+      padding: 3px 8px; border-radius: 6px; font-size: 10px;
       background: #eef2ff; color: var(--primary); font-weight: 500;
-      display: flex; align-items: center; gap: 4px;
+      display: flex; align-items: center; gap: 3px;
     }
     .bandit-arm .arm-mean { opacity: .7; }
     .bandit-arm .arm-count { opacity: .5; font-size: 10px; }
@@ -552,27 +805,53 @@
       border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
 
-    /* ========== Status Panel ========== */
-    .status-panel {
+    /* ========== Status Bar (inside main-content, full-width) ========== */
+    .status-bar {
+      grid-column: 1 / -1;
       background: var(--card-bg);
-      border-top: 1px solid var(--border);
-      padding: 12px 28px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .status-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--text-secondary);
-      box-shadow: 0 -1px 3px rgba(0,0,0,.04);
+      padding: 4px 24px;
+      gap: 20px;
       flex-wrap: wrap;
+    }
+    .status-row.primary {
+      font-size: 13px;
+      font-weight: 700;
+      padding-top: 8px;
+    }
+    .status-row.secondary {
+      font-size: 10px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      padding-bottom: 8px;
       gap: 16px;
     }
     .status-item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
-    .status-label { font-weight: 500; opacity: .7; }
-    .status-value { font-weight: 700; color: var(--text); }
+    .status-label { font-weight: 400; opacity: .65; }
+    .status-value { font-weight: 600; color: var(--text); }
+    .version-badge {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 10px;
+      background: var(--primary);
+      color: #fff;
+      padding: 1px 7px;
+      border-radius: 9px;
+    }
+    .status-sep {
+      color: var(--border);
+      font-weight: 300;
+      user-select: none;
+    }
     .status-dot {
       width: 7px;
       height: 7px;
@@ -581,6 +860,14 @@
     }
     .status-dot.online { background: var(--success); }
     .status-dot.offline { background: var(--traditional); }
+    /* Bandit inline in primary row */
+    .bandit-inline {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .bandit-inline.visible { display: flex; }
 
     /* ========== Method Selector ========== */
     .method-row {
@@ -709,43 +996,268 @@
       color: var(--primary);
     }
 
-    /* ========== Coverage Stats Bar ========== */
+    /* ========== Coverage Stats (inside insights) ========== */
     .coverage-bar {
-      display: flex;
-      gap: 12px;
-      padding: 8px 16px;
       background: #f9fafb;
+      border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      margin-top: 12px;
-      font-size: 11px;
-      flex-wrap: wrap;
+      padding: 6px 10px;
+      font-size: 10px;
     }
-    .coverage-item {
+    .coverage-bar .coverage-item {
       display: flex;
+      justify-content: space-between;
       align-items: center;
       gap: 4px;
+      padding: 2px 0;
+      border-bottom: 1px solid #f3f4f6;
     }
-    .coverage-item .val {
+    .coverage-bar .coverage-item:last-child { border-bottom: none; }
+    .coverage-bar .coverage-label { color: var(--text-secondary); }
+    .coverage-bar .coverage-item .val {
       font-weight: 700;
       color: var(--primary);
+      margin-left: 4px;
     }
-    .coverage-delta {
+    .coverage-bar .coverage-delta {
       font-weight: 700;
+      font-size: 9px; padding: 1px 4px; border-radius: 3px;
     }
     .coverage-delta.positive { color: var(--success); }
     .coverage-delta.negative { color: var(--traditional); }
 
+    /* ========== User Switcher Dropdown ========== */
+    .user-switcher {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .user-switcher select {
+      padding: 5px 28px 5px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.3);
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='white' d='M4.646 6.234a.5.5 0 0 1 .708 0L8 8.883l2.646-2.649a.5.5 0 1 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      background-size: 14px;
+    }
+    .user-switcher select:focus { outline: none; border-color: rgba(255,255,255,.6); }
+    .user-switcher label {
+      font-size: 11px;
+      opacity: .7;
+      white-space: nowrap;
+    }
+
+    /* ========== Cluster Color Bands ========== */
+    .cluster-band { /* left border color band */ }
+    .news-card[data-cluster] {
+      border-left-width: 4px;
+      border-left-style: solid;
+    }
+    .cluster-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 0;
+    }
+    .cluster-legend-item {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      border-left: 3px solid;
+      background: #f9fafb;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .cluster-legend-item:hover { background: #f0f0ff; transform: translateY(-1px); }
+    .cluster-legend-item .cluster-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .cluster-legend-item .cluster-count {
+      opacity: .6; font-size: 9px;
+    }
+
+    /* ========== Metrics Panel (inside insights) ========== */
+    .metrics-panel {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+      color: #e0e7ff;
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+    }
+    .metrics-panel .metric-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 4px;
+    }
+    .metrics-panel .metric-label {
+      font-size: 10px;
+      opacity: .7;
+    }
+    .metrics-panel .metric-value {
+      font-size: 13px;
+      font-weight: 800;
+      min-width: 32px;
+      text-align: right;
+    }
+    .metrics-panel .metric-value.good { color: #10b981; }
+    .metrics-panel .metric-value.warn { color: #f59e0b; }
+    .metrics-panel .metric-delta {
+      font-size: 9px;
+      font-weight: 600;
+      min-width: 34px;
+      text-align: right;
+    }
+    .metrics-panel .metric-delta.positive { color: #34d399; }
+    .metrics-panel .metric-delta.negative { color: #f87171; }
+
+    /* ========== Reason Badges ========== */
+    .reason-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-right: 4px;
+      letter-spacing: .02em;
+    }
+    .reason-badge.new-angle { background: #dbeafe; color: #2563eb; }
+    .reason-badge.same-story { background: #fef3c7; color: #92400e; }
+    .reason-badge.diverse-entity { background: #ede9fe; color: #6d28d9; }
+    .reason-badge.promoted { background: #d1fae5; color: #065f46; }
+    .reason-badge.new-lean { background: #fce7f3; color: #be185d; }
+    .reason-badge.new-subtopic { background: #e0e7ff; color: #3730a3; }
+
+    /* ========== Article Detail Popup ========== */
+    .detail-overlay {
+      position: fixed; top:0;left:0;width:100%;height:100%;
+      background: rgba(0,0,0,.55); z-index:1000;
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn .2s ease;
+    }
+    .detail-overlay.hidden { display: none; }
+    .detail-modal {
+      background: #fff; border-radius: 16px;
+      max-width: 560px; width: 92%; max-height: 85vh;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      display: flex; flex-direction: column; overflow: hidden;
+      animation: slideUp .3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .detail-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+    }
+    .detail-title {
+      font-size: 17px; font-weight: 700; flex: 1; margin-right: 12px;
+      line-height: 1.4;
+    }
+    .detail-close {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid var(--border); background: #fff;
+      font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all .2s;
+    }
+    .detail-close:hover { background: #fef2f2; border-color: #fca5a5; color: #ef4444; }
+    .detail-body {
+      padding: 16px 20px; overflow-y: auto; flex: 1;
+    }
+    .detail-summary {
+      font-size: 14px; line-height: 1.7; color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .detail-meta-row {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+    }
+    .detail-tags {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;
+    }
+    .detail-tag {
+      font-size: 11px; padding: 4px 10px; border-radius: 12px;
+      background: #f3f4f6; color: #4b5563; font-weight: 500;
+    }
+    .detail-cluster-info {
+      background: #f8fafc; border: 1px solid #e5e7eb;
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 12px;
+    }
+    .detail-cluster-info .cluster-title {
+      font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 6px;
+    }
+    .detail-cluster-info .cluster-peer {
+      font-size: 11px; padding: 2px 0; color: var(--text-secondary);
+      border-bottom: 1px dashed #f0f0f0;
+    }
+    .detail-cluster-info .cluster-peer:last-child { border-bottom: none; }
+    .detail-footer {
+      padding: 12px 20px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end;
+    }
+    .detail-btn {
+      padding: 8px 20px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      background: var(--primary); color: #fff; transition: all .2s;
+    }
+    .detail-btn:hover { opacity: .9; }
+
+    /* ========== Collapsible Sections ========== */
+    .collapsible-section {
+      grid-column: 1 / -1;
+      margin: 0;
+    }
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      user-select: none;
+      transition: background .2s;
+    }
+    .collapsible-header:hover { background: #f3f4f6; }
+    .collapsible-header .arrow {
+      display: inline-block;
+      transition: transform .25s ease;
+      font-size: 10px;
+    }
+    .collapsible-section.collapsed .arrow { transform: rotate(-90deg); }
+    .collapsible-section.collapsed .collapsible-body { display: none; }
+    .collapsible-body { transition: all .3s; }
+
     /* ========== Responsive ========== */
-    @media (max-width: 900px) {
-      .main-content.dual-col { grid-template-columns: 1fr; }
+    @media (max-width: 1100px) {
+      .main-content.dual-col, .main-content.two-col { grid-template-columns: 1fr; }
       .topnav { padding: 10px 16px; }
       .topnav-logo { font-size: 16px; }
-      .status-panel { padding: 10px 16px; }
+      .status-row { padding: 4px 16px; }
+      .status-row.secondary { display: none; }
     }
   </style>
 </head>
 <body>
 
+  <!-- ========== Header (sticky) ========== -->
+  <div class="header-wrap">
   <!-- ========== Top Navigation ========== -->
   <nav class="topnav">
     <div class="topnav-left">
@@ -754,13 +1266,26 @@
       <span class="user-type-badge new" id="userTypeBadge">New User | Cold Start</span>
     </div>
     <div class="topnav-right">
+      <div class="user-switcher">
+        <label>👤</label>
+        <select id="userSwitcher" title="Switch between preset user profiles">
+          <option value="">🎲 Random User</option>
+          <option value="U_TECH">💻 Tech Enthusiast</option>
+          <option value="U_SPORTS">⚽ Sports Fan</option>
+          <option value="U_GENERAL">🌐 General Reader</option>
+        </select>
+      </div>
       <button class="btn-refresh" id="btnRefresh" title="Reload recommendation data">
         <span class="refresh-icon">🔄</span> Refresh
+      </button>
+      <button class="btn-coldstart" id="btnColdStart" title="Restart cold-start onboarding and interest selection">
+        🧊 Cold Start
       </button>
       <div class="toggle-container">
         <span class="toggle-label">Show Reranked Results</span>
         <div class="toggle-switch" id="toggleRerank" title="Toggle rerank comparison"></div>
       </div>
+      <button class="insights-toggle-btn" id="btnToggleInsights" title="Toggle insights panel visibility" style="display:none;">📊 Insights</button>
     </div>
   </nav>
 
@@ -774,34 +1299,38 @@
     <button class="btn-sm" id="btnRegister">Register &amp; Start</button>
   </div>
 
-  <!-- ========== Onboarding Modal ========== -->
+  <!-- ========== Onboarding Carousel ========== -->
   <div class="onboarding-overlay hidden" id="onboardingOverlay">
     <div class="onboarding-modal" id="onboardingModal">
-      <div class="onboarding-progress" id="onboardingProgress">
-        <div class="onboarding-step-dot active" data-step="1"></div>
-        <div class="onboarding-step-dot" data-step="2"></div>
-      </div>
+      <!-- Prev / Next arrows -->
+      <button class="onb-nav prev" id="onbPrev" disabled title="Previous">◀</button>
+      <button class="onb-nav next" id="onbNext" title="Next">▶</button>
 
-      <!-- Step 1: Flat Tag Selection -->
-      <div class="onboarding-step active" id="step1">
-        <div class="onboarding-title">Select Your Interest Areas</div>
-        <div class="onboarding-subtitle">Pick your favorite categories &mdash; then refine with sub-topics &mdash; select at least 2 areas</div>
-        <div class="tag-grid" id="categoryTagGrid"></div>
-        <div class="subtopic-section" id="subtopicSection" style="display:none;">
-          <div class="subtopic-title" id="subtopicSectionTitle"></div>
-          <div class="subtopic-tags" id="subtopicTags"></div>
+      <!-- Slides track -->
+      <div class="onb-track" id="onbTrack">
+        <!-- Slide 0: Welcome + Category Selection -->
+        <div class="onb-slide" data-slide="0">
+          <div class="onb-slide-title">👋 What are you interested in?</div>
+          <div class="onb-slide-sub">Pick at least 2 categories to get started</div>
+          <div class="tag-grid" id="categoryTagGrid"></div>
         </div>
-        <div class="tag-selected-bar" id="tagSelectedBar"></div>
-        <button class="btn-onboarding" id="btnStep1Next" disabled>Continue</button>
+        <!-- Slide 1: Sub-topic refinement -->
+        <div class="onb-slide" data-slide="1">
+          <div class="onb-slide-title">🔍 Refine your interests</div>
+          <div class="onb-slide-sub">Select specific sub-topics for better recommendations</div>
+          <div class="subtopic-section" id="subtopicSection_inner" style="display:block;">
+            <div class="subtopic-title" id="subtopicSectionTitle"></div>
+            <div class="subtopic-tags" id="subtopicTags"></div>
+          </div>
+          <div class="tag-selected-bar" id="tagSelectedBar" style="margin-top:12px;"></div>
+        </div>
       </div>
 
-      <!-- Step 2: Questionnaire -->
-      <div class="onboarding-step" id="step2">
-        <div class="onboarding-title">Quick Questionnaire</div>
-        <div class="onboarding-subtitle">Answer 3 questions for more precise recommendations</div>
-        <div id="questionnaireContainer"></div>
-        <button class="btn-onboarding btn-onboarding-secondary" id="btnStep2Back">Back</button>
-        <button class="btn-onboarding" id="btnStep2Done" disabled>Finish Setup</button>
+      <!-- Bottom bar -->
+      <div class="onb-bottom" id="onbBottom">
+        <button class="onb-btn onb-btn-ghost" id="onbBtnBack" style="display:none;">← Back</button>
+        <div class="onb-dots" id="onbDots"></div>
+        <button class="onb-btn onb-btn-primary" id="onbBtnNext" disabled>Next →</button>
       </div>
     </div>
   </div>
@@ -817,9 +1346,12 @@
     <!-- Single column: baseline only (default) -->
     <div class="col-panel" id="panelBaselineSingle" style="display:flex;">
       <div class="col-header">
-        <div class="col-title">
-          📋 Baseline Recommendations
-          <span class="col-badge baseline">Baseline</span>
+        <div class="col-title-group">
+          <div class="col-title">
+            📋 Baseline Feed: Relevance First
+            <span class="col-badge baseline">Baseline</span>
+          </div>
+          <div class="col-subtitle">Ranked mainly by predicted click relevance.</div>
         </div>
         <span class="col-count" id="countBaselineSingle">10 articles</span>
       </div>
@@ -831,9 +1363,12 @@
     <!-- Dual columns: baseline (left) + reranked (right) -->
     <div class="col-panel" id="panelBaselineDual" style="display:none;">
       <div class="col-header">
-        <div class="col-title">
-          📋 Baseline Model
-          <span class="col-badge baseline">Baseline</span>
+        <div class="col-title-group">
+          <div class="col-title">
+            📋 Baseline Feed: Relevance First
+            <span class="col-badge baseline">Baseline</span>
+          </div>
+          <div class="col-subtitle">Ranked mainly by predicted click relevance.</div>
         </div>
         <span class="col-count" id="countBaselineDual">10 items</span>
       </div>
@@ -841,16 +1376,19 @@
     </div>
     <div class="col-panel" id="panelRerankedDual" style="display:none;">
       <div class="col-header">
-        <div class="col-title">
-          ✨ Reranked Optimized
-          <span class="col-badge reranked">Reranked</span>
+        <div class="col-title-group">
+          <div class="col-title">
+            ✨ Balanced Feed
+            <span class="col-badge reranked">Reranked</span>
+          </div>
+          <div class="col-subtitle">Diverse perspectives from the same story cluster.</div>
         </div>
         <div class="method-row">
           <div class="method-select" id="methodSelect">
-            <button class="method-chip active" data-method="entity_mmr">Entity MMR</button>
-            <button class="method-chip" data-method="hybrid_mmr">Hybrid MMR</button>
-            <button class="method-chip" data-method="calibrated">Calibrated</button>
+            <button class="method-chip active" data-method="hybrid_mmr">Hybrid MMR</button>
+            <button class="method-chip" data-method="entity_mmr">Entity MMR</button>
             <button class="method-chip" data-method="embedding_mmr">Embedding MMR</button>
+            <button class="method-chip" data-method="calibrated">Calibrated</button>
           </div>
           <div class="info-icon">ⓘ
             <div class="info-tooltip">
@@ -880,53 +1418,116 @@
         </div>
       </div>
       <div class="lam-slider" style="padding:0 20px;margin:8px 0;">
-        <span>Diversity λ:</span>
-        <input type="range" id="lamSlider" min="0" max="10" value="6" step="1">
-        <span class="lam-value" id="lamValue">0.6</span>
-        <span style="font-size:10px;color:var(--text-secondary);">(0=Relevance &nbsp; 1=Diversity)</span>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-weight:700;font-size:13px;">Diversity λ:</span>
+          <input type="range" id="lamSlider" min="0" max="10" value="7" step="1">
+          <span class="lam-value" id="lamValue">0.7</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin-top:2px;">
+          Balanced setting: keeps relevant articles while adding new perspectives from the same story cluster.
+          <span style="opacity:.7;">(Lower λ = relevance-first; Higher λ = diversity-first)</span>
+        </div>
       </div>
       <div class="col-body" id="bodyRerankedDual">
         <div class="loading-spinner"><div class="spinner"></div></div>
       </div>
-      <div class="coverage-bar" id="coverageBar" style="display:none;"></div>
+    </div>
+
+    <!-- ========== Third Column: Insights Panel ========== -->
+    <div class="insights-panel" id="panelInsights" style="display:none;">
+      <div class="insights-header">
+        📊 Insights
+        <div class="insights-algo-badge" id="insightsAlgoBadge" style="display:none;"></div>
+      </div>
+      <div class="insights-body">
+        <!-- Coverage Stats -->
+        <div class="coverage-bar" id="coverageBar" style="display:none;"></div>
+        <!-- Real-time Metrics -->
+        <div class="metrics-panel" id="metricsPanel" style="display:none;">
+          <div class="metric-card">
+            <span class="metric-label">📊 Entity Coverage</span>
+            <span class="metric-value" id="metricCoverage">--</span>
+            <span class="metric-delta" id="metricCoverageDelta"></span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">🔄 Retention Rate</span>
+            <span class="metric-value" id="metricRetention">--</span>
+            <span class="metric-delta" id="metricRetentionDetail"></span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">🎯 Angle Diversity</span>
+            <span class="metric-value" id="metricAngleDiversity">--</span>
+            <span class="metric-delta" id="metricAngleDetail"></span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">🏷️ Unique Subtopics</span>
+            <span class="metric-value" id="metricSubtopics">--</span>
+            <span class="metric-delta" id="metricSubtopicsDelta"></span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">📈 Avg Rank Shift</span>
+            <span class="metric-value" id="metricRankShift">--</span>
+          </div>
+        </div>
+        <!-- Story Clusters -->
+        <div class="cluster-legend" id="clusterLegendWrap">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px;">📌 Story Clusters</div>
+          <div class="cluster-legend-list" id="clusterLegend"></div>
+        </div>
+        <!-- Phase Progress -->
+        <div class="phase-bar" id="phaseBar" style="display:none;">
+          <div class="phase-progress" id="phaseProgress">
+            <span class="phase-label bootstrap" id="phaseLabel">Bootstrap</span>
+            <div class="phase-bar-bg"><div class="phase-bar-fill" id="phaseBarFill" style="width:0%;"></div></div>
+            <span class="phase-percent-text" id="phasePercent">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Status Bar (inside main-content) ========== -->
+    <div class="status-bar">
+      <!-- Row 1: Primary info -->
+      <div class="status-row primary">
+        <span class="status-value" id="statusModel" style="color:var(--primary);">Baseline</span>
+        <span class="status-sep">|</span>
+        <span class="status-value" id="statusUserType">New User</span>
+        <!-- Bandit E&E inline -->
+        <span class="bandit-inline" id="banditInline">
+          <span class="status-sep">|</span>
+          <span class="explore-indicator high" id="exploreRate" style="font-size:11px;">Explore 100%</span>
+          <span class="bandit-arms" id="banditArms"></span>
+        </span>
+      </div>
+      <!-- Row 2: Secondary info -->
+      <div class="status-row secondary">
+        <span class="status-label">UID</span>
+        <span class="status-value" id="statusUserID">U12345</span>
+        <span class="status-sep">·</span>
+        <span class="status-label">Clicks</span>
+        <span class="status-value" id="statusClicks">0</span>
+        <span class="status-sep">·</span>
+        <span class="status-label">Updated</span>
+        <span class="status-value" id="statusTime">--</span>
+        <span class="status-sep">·</span>
+        <span class="status-value version-badge" id="versionBadge">--</span>
+      </div>
     </div>
   </div>
 
-  <!-- ========== Status Panel ========== -->
-  <div class="status-panel" id="statusPanel">
-    <div class="status-item">
-      <span class="status-label">User ID:</span>
-      <span class="status-value" id="statusUserID">U12345</span>
-    </div>
-    <div class="status-item">
-      <span class="status-label">User Type:</span>
-      <span class="status-value" id="statusUserType">New User</span>
-    </div>
-    <div class="status-item">
-      <span class="status-label">Total Clicks:</span>
-      <span class="status-value" id="statusClicks">0</span>
-    </div>
-    <div class="phase-progress" id="phaseProgress">
-      <span class="phase-label bootstrap" id="phaseLabel">Bootstrap</span>
-      <div class="phase-bar-bg"><div class="phase-bar-fill" id="phaseBarFill" style="width:0%;"></div></div>
-      <span style="font-size:10px;opacity:.7;" id="phasePercent">0%</span>
-    </div>
-    <div class="status-item">
-      <span class="status-label">Active Model:</span>
-      <span class="status-value" id="statusModel">Baseline</span>
-    </div>
-    <div class="status-item">
-      <span class="status-label">Last API Call:</span>
-      <span class="status-value" id="statusTime">--</span>
-    </div>
-  </div>
+  </div><!-- /header-wrap -->
 
-  <!-- Bandit E&E Stats -->
-  <div class="bandit-panel" id="banditPanel">
-    <div class="bandit-title">🎰 E&amp;E Exploration Status</div>
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      <span class="explore-indicator high" id="exploreRate" style="font-size:12px;">Explore Rate: 100%</span>
-      <div class="bandit-arms" id="banditArms"></div>
+  <!-- ========== Article Detail Popup ========== -->
+  <div class="detail-overlay hidden" id="detailOverlay">
+    <div class="detail-modal">
+      <div class="detail-header">
+        <span class="detail-title" id="detailTitle">Article Title</span>
+        <button class="detail-close" id="detailClose">✕</button>
+      </div>
+      <div class="detail-body" id="detailBody"></div>
+      <div class="detail-footer">
+        <button class="detail-btn" id="detailCloseBtn">Close</button>
+      </div>
     </div>
   </div>
 
@@ -934,14 +1535,86 @@
   // ================================================================
   //  STATE
   // ================================================================
-  const USER_ID = 'U' + Math.floor(Math.random() * 90000 + 10000);
+  // Robust user ID cleaning — strips quotes, backslashes, and extracts U-number
+  function cleanUserId(raw) {
+    if (!raw) return null;
+    // Unwrap multiple layers of JSON encoding & stray quotes
+    let s = String(raw).trim();
+    for (let i = 0; i < 5; i++) {
+      if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+        s = s.slice(1, -1).trim();
+      } else if (s.includes('\\')) {
+        s = s.replace(/\\/g, '');
+      } else {
+        break;
+      }
+    }
+    // Match U followed by 4-6 digits
+    const m = s.match(/U\d{4,6}/);
+    return m ? m[0] : null;
+  }
+
+  // Read USER_ID from URL param or localStorage (persist across visits)
+  const urlParams = new URLSearchParams(window.location.search);
+  const storedUid = cleanUserId((() => {
+    const raw = localStorage.getItem('ns_user_id');
+    if (raw) { try { return JSON.parse(raw); } catch {} return raw; }
+    return null;
+  })());
+  let USER_ID = cleanUserId(urlParams.get('uid')) || storedUid || ('U' + Math.floor(Math.random() * 90000 + 10000));
+
+  // ----- localStorage persistence -----
+  const LS = {
+    get(key, def) {
+      try { const v = localStorage.getItem(key); return v !== null ? JSON.parse(v) : def; } catch { return def; }
+    },
+    set(key, val) {
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+    },
+    saveSession() {
+      // Persist key user state for hot-start on next visit
+      LS.set('ns_user_id', USER_ID);
+      LS.set('ns_onboarding_done', state.onboardingDone);
+      LS.set('ns_coldstart_mode', state.coldstartMode);
+      LS.set('ns_phase', state.phase);
+      LS.set('ns_total_clicks', state.totalClicks);
+      LS.set('ns_user_type', state.userType);
+      LS.set('ns_registered', state.registered);
+    },
+    restoreSession() {
+      const saved = {
+        onboardingDone: LS.get('ns_onboarding_done', false),
+        coldstartMode:  LS.get('ns_coldstart_mode', true),
+        phase:          LS.get('ns_phase', 0),
+        totalClicks:    LS.get('ns_total_clicks', 0),
+        userType:       LS.get('ns_user_type', 'new'),
+        registered:     LS.get('ns_registered', false),
+      };
+      // Only restore if same USER_ID (same browser session)
+      if (LS.get('ns_user_id', '') === USER_ID) {
+        Object.assign(state, saved);
+        return true;
+      }
+      return false;
+    },
+    // Determine if we should hot-start: onboarding done AND out of coldstart phase (<3 means in coldstart)
+    shouldHotStart() {
+      const od = LS.get('ns_onboarding_done', false);
+      const cm = LS.get('ns_coldstart_mode', true);
+      const ph = LS.get('ns_phase', 0);
+      const uid = LS.get('ns_user_id', '');
+      return uid === USER_ID && od && (!cm || ph >= 3);
+    }
+  };
+  // Persist USER_ID immediately
+  LS.set('ns_user_id', USER_ID);
 
   let state = {
     userType: 'new',           // 'new' | 'existing'
     totalClicks: 0,
     rerankEnabled: false,
-    rerankMethod: 'entity_mmr',
-    lam: 0.6,
+    rerankMethod: 'hybrid_mmr',
+    lam: 0.7,
     baselineArticles: [],      // current baseline list
     rerankedArticles: [],      // current reranked list
     clickedArticles: new Set(),
@@ -953,6 +1626,23 @@
     transitionProgress: 0,     // transition progress 0-1
     banditStats: null,         // E&E stats
     strategyBreakdown: null,   // strategy contribution ratios
+    // Preset user switching
+    presetUserId: null,        // current preset user or null for random
+    presets: [],               // loaded preset user list
+    // Search/Filter
+    searchQuery: '',
+    filterCategory: '',
+    filterLean: '',
+    searchActive: false,
+    // Clusters
+    clusterData: [],           // cluster info from backend
+    clusterColorMap: {},       // cluster_id -> color
+    // All articles cache (for search/filter and detail popup)
+    allArticles: [],
+    allArticlesLoaded: false,  // track lazy loading
+    clustersLoaded: false,     // track lazy loading
+    hotStarted: false,         // true when we skipped onboarding
+    insightsVisible: true,     // toggle insights panel visibility
   };
 
   // ================================================================
@@ -967,8 +1657,10 @@
     banner: $('#banner'),
     bannerText: $('#bannerText'),
     btnRefresh: $('#btnRefresh'),
+    btnColdStart: $('#btnColdStart'),
     toggleRerank: $('#toggleRerank'),
     mainContent: $('#mainContent'),
+    userSwitcher: $('#userSwitcher'),
 
     panelBaselineSingle: $('#panelBaselineSingle'),
     bodyBaselineSingle: $('#bodyBaselineSingle'),
@@ -984,26 +1676,58 @@
     lamSlider: $('#lamSlider'),
     lamValue: $('#lamValue'),
     coverageBar: $('#coverageBar'),
+    phaseBar: $('#phaseBar'),
+
+    panelInsights: $('#panelInsights'),
+    btnToggleInsights: $('#btnToggleInsights'),
+    insightsAlgoBadge: $('#insightsAlgoBadge'),
+
+    // Metrics panel
+    metricsPanel: $('#metricsPanel'),
+    metricCoverage: $('#metricCoverage'),
+    metricCoverageDelta: $('#metricCoverageDelta'),
+    metricRetention: $('#metricRetention'),
+    metricRetentionDetail: $('#metricRetentionDetail'),
+    metricAngleDiversity: $('#metricAngleDiversity'),
+    metricAngleDetail: $('#metricAngleDetail'),
+    metricSubtopics: $('#metricSubtopics'),
+    metricSubtopicsDelta: $('#metricSubtopicsDelta'),
+    metricRankShift: $('#metricRankShift'),
+
+    // Cluster legend
+    clusterLegend: $('#clusterLegend'),
+
+    // Article detail popup
+    detailOverlay: $('#detailOverlay'),
+    detailTitle: $('#detailTitle'),
+    detailBody: $('#detailBody'),
+    detailClose: $('#detailClose'),
+    detailCloseBtn: $('#detailCloseBtn'),
 
     statusUserID: $('#statusUserID'),
     statusUserType: $('#statusUserType'),
     statusClicks: $('#statusClicks'),
     statusModel: $('#statusModel'),
     statusTime: $('#statusTime'),
+    versionBadge: $('#versionBadge'),
 
     // Coldstart
     registerBar: $('#registerBar'),
     btnRegister: $('#btnRegister'),
     onboardingOverlay: $('#onboardingOverlay'),
     tagSelectedBar: $('#tagSelectedBar'),
-    questionnaireContainer: $('#questionnaireContainer'),
-    btnStep1Next: $('#btnStep1Next'),
-    btnStep2Back: $('#btnStep2Back'),
-    btnStep2Done: $('#btnStep2Done'),
+    // Carousel
+    onbTrack: $('#onbTrack'),
+    onbPrev: $('#onbPrev'),
+    onbNext: $('#onbNext'),
+    onbDots: $('#onbDots'),
+    onbBtnBack: $('#onbBtnBack'),
+    onbBtnNext: $('#onbBtnNext'),
+    // Phase
     phaseLabel: $('#phaseLabel'),
     phaseBarFill: $('#phaseBarFill'),
     phasePercent: $('#phasePercent'),
-    banditPanel: $('#banditPanel'),
+    banditInline: $('#banditInline'),
     banditArms: $('#banditArms'),
     exploreRate: $('#exploreRate'),
   };
@@ -1014,6 +1738,8 @@
     subtopicIds: [],
     answers: {},
     step: 1,
+    totalSlides: 2,   // will grow with questionnaire slides
+    currentSlide: 0,
   };
 
   // Category color mapping for chip display
@@ -1021,6 +1747,22 @@
     '#6366f1', '#06b6d4', '#f59e0b', '#ec4899',
     '#10b981', '#14b8a6', '#a855f7', '#f43f5e',
   ];
+
+  // Cluster color palette (vibrant, distinguishable colors)
+  const CLUSTER_COLORS = [
+    '#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6',
+    '#ec4899', '#06b6d4', '#f97316', '#14b8a6', '#e11d48',
+    '#7c3aed', '#0891b2', '#d97706', '#059669', '#dc2626',
+  ];
+
+  function getClusterColor(clusterId) {
+    if (clusterId == null || clusterId < 0) return null;
+    if (!state.clusterColorMap[clusterId]) {
+      const idx = Object.keys(state.clusterColorMap).length % CLUSTER_COLORS.length;
+      state.clusterColorMap[clusterId] = CLUSTER_COLORS[idx];
+    }
+    return state.clusterColorMap[clusterId];
+  }
 
   // Main theme -> 6 sub-theme ids
   const THEME_CHILDREN_MAP = {
@@ -1072,7 +1814,7 @@
   }
 
   function renderSubtopicsForSelected() {
-    const section = document.getElementById('subtopicSection');
+    const section = document.getElementById('subtopicSection_inner');
     const titleEl = document.getElementById('subtopicSectionTitle');
     const tagsEl = document.getElementById('subtopicTags');
     if (!section || !tagsEl || !titleEl) return;
@@ -1122,7 +1864,10 @@
   function onTagsChanged() {
     onboarding.categoryIds = [...selectedCategories];
     onboarding.subtopicIds = [...selectedSubtopics];
-    dom.btnStep1Next.disabled = onboarding.categoryIds.length < 2;
+    // Enable "Next" on slide 0 if at least 2 categories selected
+    if (onboarding.currentSlide === 0) {
+      dom.onbBtnNext.disabled = onboarding.categoryIds.length < 2;
+    }
     renderTagChips();
   }
 
@@ -1157,7 +1902,6 @@
       allSubtopics.forEach(s => { subMap[s.id] = s; });
 
       renderCategoryTags();
-      renderQuestionnaire(data.questionnaire);
     } catch (e) {
       console.error('Failed to load onboarding data:', e);
     }
@@ -1216,41 +1960,68 @@
     return resp.json();
   }
 
-  function renderQuestionnaire(questions) {
-    dom.questionnaireContainer.innerHTML = questions.map((q, qi) => `
-      <div style="margin-bottom:16px;">
-        <div class="question-text">${qi + 1}. ${q.question}</div>
-        ${q.options.map(opt => `
-          <div class="question-option" data-qid="${q.id}" data-oid="${opt.id}">
-            ${opt.label}
-          </div>
-        `).join('')}
-      </div>
-    `).join('');
-    dom.questionnaireContainer.querySelectorAll('.question-option').forEach(el => {
-      el.addEventListener('click', () => {
-        const qid = el.dataset.qid;
-        dom.questionnaireContainer.querySelectorAll(`[data-qid="${qid}"]`)
-          .forEach(o => o.classList.remove('selected'));
-        el.classList.add('selected');
-        onboarding.answers[qid] = el.dataset.oid;
-        dom.btnStep2Done.disabled = Object.keys(onboarding.answers).length < 3;
-      });
-    });
+  // ================================================================
+  //  ONBOARDING FLOW (flat tags)
+  // ================================================================
+  function goToSlide(idx) {
+    const maxIdx = onboarding.totalSlides - 1;
+    if (idx < 0 || idx > maxIdx) return;
+    onboarding.currentSlide = idx;
+
+    // Move track
+    dom.onbTrack.style.transform = `translateX(-${idx * 100}%)`;
+
+    // Update dots
+    renderDots();
+
+    // Update arrows
+    dom.onbPrev.disabled = idx === 0;
+    dom.onbNext.disabled = false;
+    dom.onbPrev.style.display = idx === 0 ? 'none' : 'flex';
+    if (idx === maxIdx) {
+      dom.onbNext.textContent = '✓ Confirm';
+      dom.onbBtnNext.textContent = '✓ Confirm';
+      dom.onbBtnNext.disabled = false;
+      dom.onbBtnNext.style.display = 'flex';
+      dom.onbBtnBack.style.display = 'flex';
+      dom.onbBtnBack.textContent = '← Back';
+    } else {
+      dom.onbNext.textContent = 'Next →';
+      dom.onbBtnBack.style.display = idx > 0 ? 'flex' : 'none';
+      dom.onbBtnBack.textContent = '← Back';
+      dom.onbBtnNext.style.display = 'flex';
+      dom.onbBtnNext.textContent = 'Next →';
+      // Enable next based on slide type
+      if (idx === 0) {
+        dom.onbBtnNext.disabled = onboarding.categoryIds.length < 2;
+      } else {
+        dom.onbBtnNext.disabled = false;
+      }
+    }
+
+    // Hide arrow for last slide (use bottom buttons instead)
+    dom.onbNext.style.display = idx === maxIdx ? 'none' : 'flex';
+    dom.onbPrev.style.display = idx === 0 ? 'none' : 'flex';
   }
 
-  function showOnboardingStep(step) {
-    onboarding.step = step;
-    ['step1','step2'].forEach((id,i) => {
-      const el = $('#' + id);
-      if (el) el.classList.toggle('active', i+1 === step);
-    });
-    $$('.onboarding-step-dot').forEach(dot => {
-      const s = parseInt(dot.dataset.step);
-      dot.classList.remove('active','done');
-      if (s < step) dot.classList.add('done');
-      else if (s === step) dot.classList.add('active');
-    });
+  function nextSlide() {
+    if (onboarding.currentSlide >= onboarding.totalSlides - 1) {
+      // Last slide: confirm
+      submitOnboarding();
+      return;
+    }
+    goToSlide(onboarding.currentSlide + 1);
+  }
+
+  function prevSlide() {
+    goToSlide(onboarding.currentSlide - 1);
+  }
+
+  function renderDots() {
+    dom.onbDots.innerHTML = Array.from({ length: onboarding.totalSlides }, (_, i) => {
+      const cls = i === onboarding.currentSlide ? 'active' : (i < onboarding.currentSlide ? 'done' : '');
+      return `<span class="onb-dot ${cls}"></span>`;
+    }).join('');
   }
 
   async function submitOnboarding() {
@@ -1258,21 +2029,30 @@
       await apiSubmitOnboarding({
         category_tag_ids: onboarding.categoryIds,
         subtopic_tag_ids: onboarding.subtopicIds,
-        questionnaire_answers: onboarding.answers,
       });
       state.onboardingDone = true;
       dom.onboardingOverlay.classList.add('hidden');
       state.coldstartMode = true;
+      LS.saveSession();
       await loadColdstart();
     } catch (e) {
       console.error('Onboarding submit error:', e);
     }
   }
 
-  // Onboarding button events (2-step flow)
-  dom.btnStep1Next?.addEventListener('click', () => showOnboardingStep(2));
-  dom.btnStep2Back?.addEventListener('click', () => showOnboardingStep(1));
-  dom.btnStep2Done?.addEventListener('click', submitOnboarding);
+  // Carousel navigation events
+  dom.onbPrev?.addEventListener('click', prevSlide);
+  dom.onbNext?.addEventListener('click', nextSlide);
+  dom.onbBtnBack?.addEventListener('click', prevSlide);
+  dom.onbBtnNext?.addEventListener('click', nextSlide);
+  // Swipe support
+  let touchStartX = 0;
+  dom.onbTrack?.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
+  dom.onbTrack?.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (dx < -50) nextSlide();
+    else if (dx > 50) prevSlide();
+  });
 
   // Register button
   dom.btnRegister?.addEventListener('click', async () => {
@@ -1282,7 +2062,7 @@
       dom.registerBar.classList.add('hidden');
       await loadOnboardingData();
       dom.onboardingOverlay.classList.remove('hidden');
-      showOnboardingStep(1);
+      goToSlide(0);
     } catch (e) {
       console.error('Register error:', e);
     }
@@ -1308,10 +2088,10 @@
 
     // Bandit stats
     if (banditStats && Object.keys(banditStats).length > 0) {
-      dom.banditPanel.classList.add('visible');
+      dom.banditInline.classList.add('visible');
       const arms = Object.entries(banditStats);
       arms.sort((a,b) => b[1].mean - a[1].mean);
-      dom.banditArms.innerHTML = arms.map(([arm, stat]) =>
+      dom.banditArms.innerHTML = arms.slice(0, 3).map(([arm, stat]) =>
         `<span class="bandit-arm">
           ${arm}
           <span class="arm-mean">μ=${stat.mean.toFixed(2)}</span>
@@ -1320,10 +2100,10 @@
       ).join('');
 
       const maxExplore = Math.max(...arms.map(([_,s]) => s.explore_prob || 0));
-      dom.exploreRate.textContent = 'Explore Rate: ' + Math.round((maxExplore || 0) * 100) + '%';
+      dom.exploreRate.textContent = 'Exp ' + Math.round((maxExplore || 0) * 100) + '%';
       dom.exploreRate.className = 'explore-indicator ' + ((maxExplore > 0.3) ? 'high' : 'low');
     } else {
-      dom.banditPanel.classList.remove('visible');
+      dom.banditInline.classList.remove('visible');
     }
 
     // Strategy breakdown → add to status model
@@ -1344,26 +2124,30 @@
   // ================================================================
 
   async function apiRecommend(topK = 10) {
+    const body = { user_id: USER_ID, top_k: topK };
+    if (state.presetUserId) body.preset_user_id = state.presetUserId;
     const resp = await fetch('/api/recommend', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: USER_ID, top_k: topK }),
+      body: JSON.stringify(body),
     });
     if (!resp.ok) throw new Error(`Recommend API error: ${resp.status}`);
     return resp.json();
   }
 
   async function apiRerank(baselineIds, method, lam) {
+    const body = {
+      user_id: USER_ID,
+      baseline_ids: baselineIds,
+      method: method,
+      lam: lam,
+      top_k: 10,
+    };
+    if (state.presetUserId) body.preset_user_id = state.presetUserId;
     const resp = await fetch('/api/rerank', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: USER_ID,
-        baseline_ids: baselineIds,
-        method: method,
-        lam: lam,
-        top_k: 10,
-      }),
+      body: JSON.stringify(body),
     });
     if (!resp.ok) throw new Error(`Rerank API error: ${resp.status}`);
     return resp.json();
@@ -1391,31 +2175,85 @@
     return { P: 'L', B: 'C', T: 'R' }[lean] || lean;
   }
 
-  function renderCard(article) {
+  function getLeanFull(lean) {
+    return { P: 'Left', B: 'Center', T: 'Right' }[lean] || lean;
+  }
+
+  function renderCard(article, isReranked = false) {
     const lean = article.sourceLean || 'B';
+    const leanLabel = getLeanLabel(lean);
+    const leanFull = getLeanFull(lean);
     const score = article.score || 0;
     const scoreClass = score > 0.7 ? 'high' : score > 0.35 ? 'mid' : 'low';
     const isClicked = state.clickedArticles.has(article.id);
+    const clusterName = article.clusterName || '';
+    const clusterId = article.clusterId != null ? article.clusterId : -1;
+    const diversityGain = article.diversityGain || 0;
+    const reason = article.reason || '';
+    const gainDisplay = diversityGain > 0 ? `+${diversityGain.toFixed(2)}` : diversityGain.toFixed(2);
+
+    // Cluster color
+    const clusterColor = clusterId >= 0 ? getClusterColor(clusterId) : null;
+    const clusterStyle = clusterColor ? `style="border-left-color:${clusterColor};" data-cluster="${clusterId}"` : '';
+
+    // Reason badges
+    let reasonBadges = '';
+    if (isReranked && reason) {
+      const rl = reason.toLowerCase();
+      if (rl.includes('promoted')) reasonBadges += '<span class="reason-badge promoted">⬆ Promoted</span>';
+      if (rl.includes('adds left') || rl.includes('adds right') || rl.includes('adds center')) reasonBadges += '<span class="reason-badge new-lean">🔄 New Viewpoint</span>';
+      if (rl.includes('broadens') || rl.includes('different angle')) reasonBadges += '<span class="reason-badge new-angle">🆕 New Angle</span>';
+      if (rl.includes('same story')) reasonBadges += '<span class="reason-badge same-story">📖 Same Story</span>';
+      if (rl.includes('entity') || rl.includes('diverse')) reasonBadges += '<span class="reason-badge diverse-entity">🎯 Diverse Entity</span>';
+      if (!reasonBadges) reasonBadges = '<span class="reason-badge new-subtopic">📌 ' + (clusterName || 'New Topic') + '</span>';
+    }
+
+    // Build info row
+    let infoParts = [];
+    if (clusterName) {
+      const clr = clusterColor || '#9ca3af';
+      infoParts.push(`<span class="card-cluster" style="border-left:3px solid ${clr}; padding-left:4px;">${escapeHtml(clusterName)}</span>`);
+    }
+    infoParts.push(`<span class="card-perspective ${leanLabel}">Perspective: ${leanFull}</span>`);
+    infoParts.push(`<span style="font-size:10px;">Relevance: ${score.toFixed(2)}</span>`);
+    if (diversityGain > 0) {
+      infoParts.push(`<span class="card-gain">Diversity Gain: ${gainDisplay}</span>`);
+    }
+
+    // Reason / tooltip for reranked cards
+    const reasonHtml = (isReranked && reason) ? `
+      <div class="card-reason" title="${escapeHtml(reason)}">${escapeHtml(reason)}</div>
+      <div class="card-tooltip">${escapeHtml(reason)}</div>
+    ` : (reason ? `<div class="card-reason">${escapeHtml(reason)}</div>` : '');
+
+    // Tags preview (first 3 tags)
+    const tagsPreview = (article.tags || []).slice(0, 3).map(t => `<span style="font-size:9px;color:#9ca3af;">#${escapeHtml(typeof t === 'string' ? t : t.t || '')}</span>`).join(' ');
 
     return `
-      <div class="news-card ${isClicked ? 'clicked' : ''}" data-id="${article.id}">
+      <div class="news-card ${isClicked ? 'clicked' : ''} ${isReranked ? 'reranked' : ''}"
+           data-id="${article.id}" data-reranked="${isReranked ? '1' : '0'}"
+           data-cluster-id="${clusterId}" ${clusterStyle}>
         <img class="card-thumb"
              src="${article.thumb || 'https://picsum.photos/seed/' + article.id + '/200/150'}"
              alt=""
-             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2272%22><rect fill=%22%23e5e7eb%22 width=%22100%22 height=%2272%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%239ca3af%22 font-size=%2211%22>No Image</text></svg>'">
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%2240%22><rect fill=%22%23e5e7eb%22 width=%2256%22 height=%2240%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%239ca3af%22 font-size=%229%22>No Image</text></svg>'">
         <div class="card-body">
           <div class="card-rank">#${article.rank || '-'}</div>
+          ${reasonBadges ? `<div style="margin-bottom:2px;">${reasonBadges}</div>` : ''}
           <div class="card-title">${escapeHtml(article.title || 'Untitled')}</div>
           <div class="card-summary">${escapeHtml(article.summary || article.abstract || '')}</div>
           <div class="card-meta">
             <span class="card-source">${escapeHtml(article.source || '')}</span>
-            <span class="card-lean ${lean}">${getLeanLabel(lean)}</span>
+            <span class="card-lean ${lean}">${leanLabel}</span>
             ${article.subtopic ? `<span style="font-size:10px;color:#9ca3af;">${escapeHtml(article.subtopic)}</span>` : ''}
             <span class="card-time">${escapeHtml(article.time || '')}</span>
           </div>
+          ${tagsPreview ? `<div style="margin-top:2px;">${tagsPreview}</div>` : ''}
           <div class="card-score-bar">
             <div class="card-score-fill ${scoreClass}" style="width:${Math.round(score * 100)}%;"></div>
           </div>
+          <div class="card-info-row">${infoParts.join(' · ')}</div>
+          ${reasonHtml}
         </div>
       </div>
     `;
@@ -1428,7 +2266,7 @@
     return div.innerHTML;
   }
 
-  function renderArticleList(container, articles) {
+  function renderArticleList(container, articles, isReranked = false) {
     if (!articles || articles.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
@@ -1437,38 +2275,306 @@
         </div>`;
       return;
     }
-    container.innerHTML = articles.map(renderCard).join('');
+    container.innerHTML = articles.map(a => renderCard(a, isReranked)).join('');
   }
 
   function renderCoverageBar(stats) {
     if (!stats) { dom.coverageBar.style.display = 'none'; return; }
     const d = stats.delta || {};
-    const b = stats.baseline || {};
     const r = stats.reranked || {};
 
-    dom.coverageBar.style.display = 'flex';
+    dom.coverageBar.style.display = 'block';
+    const deltaCls = (v) => v >= 0 ? 'positive' : 'negative';
+    const deltaSign = (v) => v >= 0 ? '+' : '';
     dom.coverageBar.innerHTML = `
-      <div class="coverage-item">📊 Entity Coverage: <span class="val">${r.entity_coverage || 0}</span>
-        <span class="coverage-delta ${(d.entity_coverage_gain || 0) >= 0 ? 'positive' : 'negative'}">
-          ${(d.entity_coverage_gain || 0) >= 0 ? '+' : ''}${d.entity_coverage_gain || 0}
-        </span>
+      <div class="coverage-item">
+        <span class="coverage-label">📊 Entity Coverage</span>
+        <span class="coverage-delta ${deltaCls(d.entityCoverageGain || 0)}">${deltaSign(d.entityCoverageGain || 0)}${d.entityCoverageGain || 0}</span>
+        <span class="val">${r.entityCoverage || 0}</span>
       </div>
-      <div class="coverage-item">🏷️ Unique Subtopics: <span class="val">${r.unique_subtopics || 0}</span>
-        <span class="coverage-delta ${(d.subtopic_gain || 0) >= 0 ? 'positive' : 'negative'}">
-          ${(d.subtopic_gain || 0) >= 0 ? '+' : ''}${d.subtopic_gain || 0}
-        </span>
+      <div class="coverage-item">
+        <span class="coverage-label">🏷️ Unique Subtopics</span>
+        <span class="coverage-delta ${deltaCls(d.subtopicGain || 0)}">${deltaSign(d.subtopicGain || 0)}${d.subtopicGain || 0}</span>
+        <span class="val">${r.uniqueSubtopics || 0}</span>
       </div>
-      <div class="coverage-item">🌐 Lean Distribution: ${JSON.stringify(r.lean_distribution || {})}</div>
+      <div class="coverage-item">
+        <span class="coverage-label">🌐 Lean Distribution</span>
+        <span class="val" style="font-size:9px;">${JSON.stringify(r.leanDistribution || {})}</span>
+      </div>
     `;
+
+    // Also update the metrics panel & cluster legend
+    renderMetricsPanel(stats);
+    renderClusterLegend();
   }
 
+  function renderMetricsPanel(stats) {
+    if (!stats) { dom.metricsPanel.style.display = 'none'; return; }
+    dom.metricsPanel.style.display = 'flex';
+    // Always fill data
+
+    const d = stats.delta || {};
+    const r = stats.reranked || {};
+    const ret = stats.retention || {};
+    const ad = stats.angleDiversity || 0;
+
+    // Entity Coverage
+    dom.metricCoverage.textContent = r.entityCoverage || 0;
+    const ecDelta = d.entityCoverageGain || 0;
+    dom.metricCoverageDelta.textContent = ecDelta >= 0 ? `+${ecDelta} vs baseline` : `${ecDelta} vs baseline`;
+    dom.metricCoverageDelta.className = 'metric-delta ' + (ecDelta >= 0 ? 'positive' : 'negative');
+    dom.metricCoverage.className = 'metric-value ' + (ecDelta > 5 ? 'good' : 'warn');
+
+    // Retention
+    const or = ret.overlapRate != null ? Math.round(ret.overlapRate * 100) : 0;
+    dom.metricRetention.textContent = or + '%';
+    dom.metricRetentionDetail.textContent = `${ret.articleOverlap || 0} articles overlap`;
+    dom.metricRetentionDetail.className = 'metric-delta';
+    dom.metricRetention.className = 'metric-value ' + (or >= 60 ? 'good' : 'warn');
+
+    // Angle Diversity
+    dom.metricAngleDiversity.textContent = (ad * 100).toFixed(1) + '%';
+    dom.metricAngleDetail.textContent = 'avg Jaccard distance';
+    dom.metricAngleDetail.className = 'metric-delta positive';
+    dom.metricAngleDiversity.className = 'metric-value ' + (ad > 0.4 ? 'good' : 'warn');
+
+    // Unique Subtopics
+    dom.metricSubtopics.textContent = r.uniqueSubtopics || 0;
+    const sg = d.subtopicGain || 0;
+    dom.metricSubtopicsDelta.textContent = sg >= 0 ? `+${sg} vs baseline` : `${sg} vs baseline`;
+    dom.metricSubtopicsDelta.className = 'metric-delta ' + (sg >= 0 ? 'positive' : 'negative');
+    dom.metricSubtopics.className = 'metric-value';
+
+    // Avg Rank Shift
+    const ars = ret.avgRankShift || 0;
+    dom.metricRankShift.textContent = ars.toFixed(1);
+    dom.metricRankShift.className = 'metric-value';
+  }
+
+  function renderClusterLegend() {
+    // Build cluster info from reranked articles
+    const clusters = {};
+    for (const a of state.rerankedArticles) {
+      const cid = a.clusterId;
+      if (cid == null || cid < 0) continue;
+      if (!clusters[cid]) {
+        clusters[cid] = { id: cid, name: a.clusterName || `Cluster ${cid}`, articles: [], leans: new Set() };
+      }
+      clusters[cid].articles.push(a);
+      clusters[cid].leans.add(a.sourceLean || 'B');
+    }
+
+    const entries = Object.values(clusters);
+    if (entries.length === 0) {
+      dom.clusterLegend.innerHTML = '<span style="font-size:10px;color:#9ca3af;">No clusters formed yet — toggle rerank to generate</span>';
+      return;
+    }
+    dom.clusterLegend.innerHTML = entries.map(c => {
+      const color = getClusterColor(c.id) || '#9ca3af';
+      return `<span class="cluster-legend-item" style="border-left-color:${color};" data-cluster="${c.id}">
+        <span class="cluster-dot" style="background:${color};"></span>
+        ${escapeHtml(c.name)}
+        <span class="cluster-count">(${c.articles.length} perspectives: ${[...c.leans].join(', ')})</span>
+      </span>`;
+    }).join('');
+  }
+
+  // ================================================================
+  //  ARTICLE DETAIL POPUP
+  // ================================================================
+
+  async function showArticleDetail(articleId) {
+    try {
+      // Try to find article in current list first
+      let article = state.baselineArticles.find(a => a.id === articleId)
+                 || state.rerankedArticles.find(a => a.id === articleId);
+
+      // If not in current lists, fetch from API
+      if (!article) {
+        // Lazy-load all articles cache if not yet loaded
+        await ensureAllArticles();
+        if (state.allArticles.length > 0) {
+          article = state.allArticles.find(a => a.id === articleId);
+        }
+        if (!article) {
+          const resp = await fetch(`/api/news/${articleId}`);
+          if (resp.ok) article = await resp.json();
+        }
+      }
+
+      if (!article) return;
+
+      dom.detailTitle.textContent = article.title || 'Untitled';
+      const lean = article.sourceLean || 'B';
+      const leanFull = getLeanFull(lean);
+      const tags = article.tags || [];
+      const summary = article.summary || article.abstract || 'No summary available.';
+      const clusterName = article.clusterName || '';
+      const clusterId = article.clusterId != null ? article.clusterId : -1;
+
+      // Find peer articles in same cluster
+      let clusterPeersHtml = '';
+      const clusterColor = getClusterColor(clusterId);
+      if (clusterId >= 0) {
+        const peers = (state.rerankedArticles.concat(state.baselineArticles))
+          .filter(a => a.clusterId === clusterId && a.id !== articleId)
+          .slice(0, 5);
+        if (peers.length > 0) {
+          clusterPeersHtml = `
+            <div class="detail-cluster-info">
+              <div class="cluster-title" style="border-left:3px solid ${clusterColor || '#6366f1'}; padding-left:8px;">
+                📌 Same Story Cluster: ${escapeHtml(clusterName || 'Cluster ' + clusterId)}
+              </div>
+              ${peers.map(p => `
+                <div class="cluster-peer">
+                  <span style="font-weight:600;">${escapeHtml(p.source || '')}</span>
+                  <span class="card-lean ${p.sourceLean || 'B'}" style="margin-left:6px;">${getLeanLabel(p.sourceLean || 'B')}</span>
+                  — ${escapeHtml((p.title || '').substring(0, 80))}${(p.title || '').length > 80 ? '...' : ''}
+                </div>
+              `).join('')}
+            </div>`;
+        }
+      }
+
+      dom.detailBody.innerHTML = `
+        <div class="detail-meta-row">
+          <span class="card-source">${escapeHtml(article.source || 'Unknown Source')}</span>
+          <span class="card-lean ${lean}">${leanFull}</span>
+          <span class="card-time">${escapeHtml(article.time || '')}</span>
+          <span style="font-size:11px;color:var(--text-secondary);">Relevance: ${(article.score || 0).toFixed(2)}</span>
+        </div>
+        <div class="detail-summary">${escapeHtml(summary)}</div>
+        ${article.subtopic ? `<div style="margin-bottom:10px;"><span class="detail-tag" style="background:#eef2ff;color:var(--primary);font-weight:700;">🏷️ ${escapeHtml(article.subtopic)}</span></div>` : ''}
+        <div class="detail-tags">
+          ${tags.map(t => `<span class="detail-tag">#${escapeHtml(typeof t === 'string' ? t : t.t || '')}</span>`).join('')}
+        </div>
+        ${clusterPeersHtml}
+        ${article.reason ? `<div style="margin-top:8px;padding:10px 14px;background:#f0fdf4;border-radius:8px;font-size:12px;color:#065f46;">💡 ${escapeHtml(article.reason)}</div>` : ''}
+      `;
+
+      dom.detailOverlay.classList.remove('hidden');
+    } catch (e) {
+      console.error('showArticleDetail error:', e);
+    }
+  }
+
+  function hideArticleDetail() {
+    dom.detailOverlay.classList.add('hidden');
+  }
+
+  // Detail popup event listeners
+  dom.detailClose?.addEventListener('click', hideArticleDetail);
+  dom.detailCloseBtn?.addEventListener('click', hideArticleDetail);
+  dom.detailOverlay?.addEventListener('click', e => {
+    if (e.target === dom.detailOverlay) hideArticleDetail();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !dom.detailOverlay.classList.contains('hidden')) {
+      hideArticleDetail();
+    }
+  });
+
+  // ================================================================
+  //  PRESET USERS & CLUSTER DATA LOADING
+  // ================================================================
+
+  async function fetchPresets() {
+    try {
+      const resp = await fetch('/api/users/presets');
+      if (resp.ok) {
+        const data = await resp.json();
+        state.presets = data.presets || [];
+      }
+    } catch (e) {
+      console.error('fetchPresets error:', e);
+    }
+  }
+
+  async function fetchClusters() {
+    try {
+      const resp = await fetch('/api/articles/clusters');
+      if (resp.ok) {
+        const data = await resp.json();
+        state.clusterData = data.clusters || [];
+      }
+    } catch (e) {
+      console.error('fetchClusters error:', e);
+    }
+  }
+
+  async function fetchAllArticles() {
+    try {
+      const resp = await fetch('/api/news?limit=120');
+      if (resp.ok) {
+        const data = await resp.json();
+        state.allArticles = data.articles || [];
+        // Populate category filter
+        const cats = [...new Set(state.allArticles.map(a => a.category).filter(Boolean))].sort();
+        dom.filterCategory.innerHTML = '<option value="">All Categories</option>' +
+          cats.map(c => `<option value="${c}">${c}</option>`).join('');
+      }
+    } catch (e) {
+      console.error('fetchAllArticles error:', e);
+    }
+  }
+
+  // ================================================================
+  //  USER SWITCHER
+  // ================================================================
+
+  dom.userSwitcher?.addEventListener('change', async () => {
+    const val = dom.userSwitcher.value;
+    state.presetUserId = val || null;
+
+    if (state.presetUserId) {
+      // Skip onboarding for preset users
+      state.coldstartMode = false;
+      state.registered = true;
+      state.onboardingDone = true;
+      state.userType = 'existing';
+      dom.registerBar.classList.add('hidden');
+      dom.onboardingOverlay.classList.add('hidden');
+
+      updateBanner();
+      updateStatusPanel();
+      await loadBaseline(false);
+      if (state.rerankEnabled) await loadReranked();
+    } else {
+      // Back to random user - show onboarding
+      state.coldstartMode = true;
+      state.registered = false;
+      state.onboardingDone = false;
+      state.userType = 'new';
+      state.totalClicks = 0;
+      dom.panelInsights.style.display = 'none';
+
+      updateBanner();
+      updateStatusPanel();
+      dom.registerBar.classList.remove('hidden');
+      dom.onboardingOverlay.classList.remove('hidden');
+      goToSlide(0);
+    }
+  });
+
   function updateStatusPanel() {
-    dom.statusUserID.textContent = USER_ID;
-    dom.statusUserType.textContent = state.userType === 'new' ? 'New User' : 'Existing User';
+    const displayId = cleanUserId(state.presetUserId) || USER_ID;
+    dom.statusUserID.textContent = displayId;
+    dom.statusUserType.textContent = state.presetUserId
+      ? 'Preset: ' + state.presetUserId.replace('U_', '').replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
+      : (state.userType === 'new' ? 'New User' : 'Existing User');
     dom.statusClicks.textContent = state.totalClicks;
-    dom.statusModel.textContent = state.rerankEnabled
-      ? 'Baseline + Reranking (' + state.rerankMethod + ')'
-      : 'Baseline';
+    // Algorithm info moved to insights panel badge
+    if (state.rerankEnabled && state.rerankedArticles.length > 0) {
+      dom.insightsAlgoBadge.textContent = (state.rerankMethod || 'hybrid_mmr').replace(/_/g, ' ') + ' · λ=' + state.lam.toFixed(1);
+      dom.insightsAlgoBadge.style.display = 'inline-block';
+      dom.statusModel.textContent = 'Baseline + Rerank';
+    } else {
+      dom.insightsAlgoBadge.style.display = 'none';
+      dom.statusModel.textContent = 'Baseline';
+    }
+    dom.userBadge.textContent = state.presetUserId
+      ? 'User: ' + state.presetUserId.replace('U_', '').replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
+      : 'User ID: ' + USER_ID;
     const now = new Date();
     dom.statusTime.textContent =
       now.getFullYear() + '-' +
@@ -1494,19 +2600,35 @@
 
   function updateLayout() {
     if (state.rerankEnabled) {
-      dom.mainContent.className = 'main-content dual-col';
+      dom.toggleRerank.classList.add('on');
+      // Show the insights toggle button
+      dom.btnToggleInsights.style.display = 'inline-flex';
+      if (state.insightsVisible) {
+        dom.mainContent.className = 'main-content dual-col';
+        dom.panelInsights.style.display = 'flex';
+        dom.phaseBar.style.display = 'block';
+        dom.btnToggleInsights.classList.remove('hidden-insights');
+      } else {
+        dom.mainContent.className = 'main-content two-col';
+        dom.panelInsights.style.display = 'none';
+        dom.phaseBar.style.display = 'none';
+        dom.coverageBar.style.display = 'none';
+        dom.btnToggleInsights.classList.add('hidden-insights');
+      }
       dom.panelBaselineSingle.style.display = 'none';
       dom.panelBaselineDual.style.display = 'flex';
       dom.panelRerankedDual.style.display = 'flex';
       dom.panelRerankedDual.querySelector('.method-row').style.display = 'flex';
-      dom.toggleRerank.classList.add('on');
     } else {
       dom.mainContent.className = 'main-content single-col';
       dom.panelBaselineSingle.style.display = 'flex';
       dom.panelBaselineDual.style.display = 'none';
       dom.panelRerankedDual.style.display = 'none';
+      dom.panelInsights.style.display = 'none';
       dom.coverageBar.style.display = 'none';
+      dom.phaseBar.style.display = 'none';
       dom.toggleRerank.classList.remove('on');
+      dom.btnToggleInsights.style.display = 'none';
     }
     updateStatusPanel();
   }
@@ -1525,6 +2647,10 @@
       state.baselineArticles = data.baseline || [];
       state.userType = data.user_type || 'new';
       state.totalClicks = data.total_clicks || 0;
+      // If using preset, override user type
+      if (data.using_preset) {
+        state.presetUserId = data.using_preset;
+      }
 
       // Render using current layout
       if (state.rerankEnabled) {
@@ -1540,6 +2666,7 @@
 
       updateBanner();
       updateStatusPanel();
+      if (!state.coldstartMode) LS.saveSession();
     } catch (err) {
       console.error('loadBaseline error:', err);
       dom.bodyBaselineSingle.innerHTML = `
@@ -1563,8 +2690,8 @@
 
       // Update both columns
       dom.countBaselineDual.textContent = `${state.baselineArticles.length} items`;
-      renderArticleList(dom.bodyBaselineDual, state.baselineArticles);
-      renderArticleList(dom.bodyRerankedDual, state.rerankedArticles);
+      renderArticleList(dom.bodyBaselineDual, state.baselineArticles, false);
+      renderArticleList(dom.bodyRerankedDual, state.rerankedArticles, true);
       dom.panelRerankedDual.querySelector('.method-row').style.display = 'flex';
 
       renderCoverageBar(data.coverage_stats);
@@ -1579,7 +2706,33 @@
     }
   }
 
+  // Client-side boost: prioritize articles related to last clicked article
+  function boostByLastClicked(articles, lastClicked) {
+    if (!lastClicked || !articles || articles.length === 0) return articles;
+    const boosted = articles.map(a => {
+      let boost = 0;
+      // Same subtopic = strong boost
+      if (lastClicked.subtopic && a.subtopic === lastClicked.subtopic) boost += 0.15;
+      // Same category = moderate boost
+      if (lastClicked.category && a.category === lastClicked.category) boost += 0.08;
+      // Same cluster = bonus
+      if (lastClicked.clusterId != null && a.clusterId === lastClicked.clusterId) boost += 0.12;
+      // Tag overlap = small boost
+      const clickedTags = new Set(lastClicked.tags || []);
+      const articleTags = a.tags || [];
+      const tagOverlap = articleTags.filter(t => clickedTags.has(t)).length;
+      boost += Math.min(0.10, tagOverlap * 0.02);
+      return { ...a, _clickBoost: boost, _effectiveScore: (a.score || 0) + boost };
+    });
+    // Sort by effective score descending
+    boosted.sort((a, b) => (b._effectiveScore || 0) - (a._effectiveScore || 0));
+    // Re-assign ranks
+    boosted.forEach((a, i) => { a.rank = i + 1; });
+    return boosted;
+  }
+
   async function handleCardClick(articleId) {
+    let lastClicked = null;
     try {
       if (state.coldstartMode && state.phase < 3) {
         // Coldstart mode: use coldstart feedback + coldstart recommend
@@ -1593,6 +2746,8 @@
         const fb = await apiFeedback(articleId, 'click');
         state.totalClicks = fb.total_clicks || state.totalClicks + 1;
         state.userType = fb.user_type || 'existing';
+        // Store last clicked article info for client-side boosting
+        lastClicked = fb.last_clicked || null;
       }
 
       state.clickedArticles.add(articleId);
@@ -1603,9 +2758,21 @@
       if (state.coldstartMode && state.phase < 3) {
         await loadColdstart();
         if (state.phase >= 2 && state.rerankEnabled) await loadReranked();
+        LS.saveSession();
       } else {
         state.coldstartMode = false; // Transition complete
+        LS.saveSession(); // Persist hot-start state for next visit
         await loadBaseline(true);
+        // Client-side boosting: re-rank baseline based on last clicked
+        if (lastClicked && state.baselineArticles.length > 0) {
+          state.baselineArticles = boostByLastClicked(state.baselineArticles, lastClicked);
+          // Re-render with boosted order
+          if (state.rerankEnabled) {
+            renderArticleList(dom.bodyBaselineDual, state.baselineArticles, false);
+          } else {
+            renderArticleList(dom.bodyBaselineSingle, state.baselineArticles);
+          }
+        }
         if (state.rerankEnabled) await loadReranked();
       }
     } catch (err) {
@@ -1627,17 +2794,60 @@
     }
   }
 
+  async function restartColdStart() {
+    // Reset all cold-start state
+    state.coldstartMode = true;
+    state.registered = false;
+    state.onboardingDone = false;
+    state.phase = 0;
+    state.transitionProgress = 0;
+    state.userType = 'new';
+    state.totalClicks = 0;
+    state.clickedArticles.clear();
+    state.rerankEnabled = false;
+    state.insightsVisible = true;
+    state.presetUserId = null;
+    dom.userSwitcher.value = '';
+    // Clear onboarding storage
+    localStorage.removeItem('ns_onboarding_done');
+    localStorage.removeItem('ns_coldstart_mode');
+    localStorage.removeItem('ns_phase');
+    localStorage.removeItem('ns_total_clicks');
+    localStorage.removeItem('ns_user_type');
+    localStorage.removeItem('ns_registered');
+    // Update UI
+    onboarding = { categoryIds: [], subtopicIds: [], answers: {}, currentSlide: 0, totalSlides: 2 };
+    selectedCategories.clear();
+    selectedSubtopics.clear();
+    updateLayout();
+    updateBanner();
+    updateStatusPanel();
+    // Show onboarding flow
+    await loadOnboardingData();
+    dom.registerBar.classList.add('hidden');
+    dom.onboardingOverlay.classList.remove('hidden');
+    goToSlide(0);
+  }
+
   function toggleRerank() {
     state.rerankEnabled = !state.rerankEnabled;
     updateLayout();
 
     if (state.rerankEnabled) {
+      // Lazy-load clusters + all-articles only when entering comparison view
+      ensureClusters();
+      ensureAllArticles();
       loadReranked();
     } else {
       // Switch back to single-col — re-render baseline
       renderArticleList(dom.bodyBaselineSingle, state.baselineArticles);
       dom.countBaselineSingle.textContent = `${state.baselineArticles.length} articles`;
     }
+  }
+
+  function toggleInsights() {
+    state.insightsVisible = !state.insightsVisible;
+    updateLayout();
   }
 
   function setMethod(method) {
@@ -1657,7 +2867,11 @@
 
   dom.btnRefresh.addEventListener('click', handleRefresh);
 
+  dom.btnColdStart.addEventListener('click', restartColdStart);
+
   dom.toggleRerank.addEventListener('click', toggleRerank);
+
+  dom.btnToggleInsights.addEventListener('click', toggleInsights);
 
   // Method chips
   dom.methodSelect.addEventListener('click', e => {
@@ -1700,11 +2914,48 @@
   });
 
   // Card click delegation — covers all article containers
+  let cardClickTimer = null;
   document.addEventListener('click', e => {
     const card = e.target.closest('.news-card');
     if (!card) return;
     const id = parseInt(card.dataset.id);
-    if (id) handleCardClick(id);
+    if (!id) return;
+
+    // If reranked card and clicking the reason area, toggle tooltip instead of feedback
+    const isReranked = card.dataset.reranked === '1';
+    const clickedReason = e.target.closest('.card-reason');
+    if (isReranked && clickedReason) {
+      card.classList.toggle('tooltip-visible');
+      setTimeout(() => card.classList.remove('tooltip-visible'), 3000);
+      e.stopPropagation();
+      return;
+    }
+
+    // Double-click detection for article detail popup
+    if (cardClickTimer) {
+      clearTimeout(cardClickTimer);
+      cardClickTimer = null;
+      // Double-click → show detail
+      showArticleDetail(id);
+      return;
+    }
+    // Single click → feedback (with delay to detect double-click)
+    cardClickTimer = setTimeout(() => {
+      cardClickTimer = null;
+      handleCardClick(id);
+    }, 250);
+  });
+
+  // Click on cluster legend items to scroll to that cluster
+  dom.clusterLegend?.addEventListener('click', e => {
+    const item = e.target.closest('.cluster-legend-item');
+    if (!item) return;
+    const cid = parseInt(item.dataset.cluster);
+    // Highlight all cards in this cluster
+    document.querySelectorAll(`.news-card[data-cluster-id="${cid}"]`).forEach(card => {
+      card.style.boxShadow = '0 0 0 3px ' + (getClusterColor(cid) || '#6366f1');
+      setTimeout(() => { card.style.boxShadow = ''; }, 2000);
+    });
   });
 
   // Keyboard shortcut: Ctrl+R to toggle rerank
@@ -1736,6 +2987,7 @@
         state.phase = data.phase;
         updateBanner();
         updateStatusPanel();
+        LS.saveSession();
         await loadBaseline(true);
         return;
       }
@@ -1745,6 +2997,7 @@
       renderArticleList(dom.bodyBaselineSingle, state.baselineArticles);
       updateBanner();
       updateStatusPanel();
+      LS.saveSession();
     } catch (err) {
       console.error('loadColdstart error:', err);
       dom.bodyBaselineSingle.innerHTML =
@@ -1756,27 +3009,73 @@
   //  INIT
   // ================================================================
 
+  async function fetchVersion() {
+    try {
+      const resp = await fetch('/api/version');
+      const data = await resp.json();
+      dom.versionBadge.textContent = 'v' + data.version;
+    } catch {
+      dom.versionBadge.textContent = 'v--';
+    }
+  }
+
+  /** Lazy load clusters (only when needed for detail/rerank view) */
+  async function ensureClusters() {
+    if (state.clustersLoaded) return;
+    state.clustersLoaded = true;
+    await fetchClusters();
+  }
+
+  /** Lazy load all articles (only when needed for filter/search/detail) */
+  async function ensureAllArticles() {
+    if (state.allArticlesLoaded) return;
+    state.allArticlesLoaded = true;
+    await fetchAllArticles();
+  }
+
   async function init() {
     dom.userBadge.textContent = 'User ID: ' + USER_ID;
     dom.statusUserID.textContent = USER_ID;
     dom.statusTime.textContent = '--';
     updateStatusPanel();
+    fetchVersion();
+    fetchPresets();
 
-    // Check if user needs coldstart onboarding
-    // For demo: always show onboarding for new sessions
-    const needsOnboarding = true; // Could check localStorage
-    if (needsOnboarding) {
-      dom.registerBar.classList.remove('hidden');
-      // Preload onboarding data
-      loadOnboardingData();
-      // Also preload coldstart default to show something behind
-      // (without registration, still works with default static profile)
+    // ── Decide cold-start vs hot-start ──
+    const hot = LS.shouldHotStart();
+    if (hot) {
+      // ⚡ HOT START: skip onboarding, skip coldstart, go straight to baseline
+      LS.restoreSession();
+      state.hotStarted = true;
+      state.coldstartMode = false;
+      state.onboardingDone = true;
       dom.registerBar.classList.add('hidden');
-      dom.onboardingOverlay.classList.remove('hidden');
-      showOnboardingStep(1);
-    } else {
+      dom.onboardingOverlay.classList.add('hidden');
+      updateBanner();
+      updateStatusPanel();
+      // Lazy: only load clusters + all-articles in background (non-blocking)
+      setTimeout(() => { ensureClusters(); ensureAllArticles(); }, 500);
       await loadBaseline(false);
+      return;
     }
+
+    // 🧊 COLD START: restore partial session if exists, show onboarding
+    LS.restoreSession();
+    // If onboarding was already done but still in coldstart phase, skip onboarding UI
+    if (state.onboardingDone && state.coldstartMode && state.phase < 3) {
+      dom.registerBar.classList.add('hidden');
+      dom.onboardingOverlay.classList.add('hidden');
+      await loadColdstart();
+      LS.saveSession();
+      return;
+    }
+
+    // Full cold start: show onboarding
+    dom.registerBar.classList.remove('hidden');
+    await loadOnboardingData();
+    dom.registerBar.classList.add('hidden');
+    dom.onboardingOverlay.classList.remove('hidden');
+    goToSlide(0);
   }
 
   document.addEventListener('DOMContentLoaded', init);

@@ -15,6 +15,10 @@ build/
 # Backup files
 *.bak
 *.gz
+*.png
+*.jpg
+*.jpeg
+*.gif
 
 # IDE
 .idea/

@@ -8,6 +8,19 @@ import sys
 API_TARGET = "http://127.0.0.1:8096"
 
 class ProxyHandler(http.server.SimpleHTTPRequestHandler):
+    # Add charset=UTF-8 for text/* content types to prevent garbled Chinese
+    extensions_map = {
+        **http.server.SimpleHTTPRequestHandler.extensions_map,
+        '.html': 'text/html; charset=utf-8',
+        '.htm': 'text/html; charset=utf-8',
+        '.css': 'text/css; charset=utf-8',
+        '.js': 'application/javascript; charset=utf-8',
+        '.json': 'application/json; charset=utf-8',
+        '.xml': 'application/xml; charset=utf-8',
+        '.svg': 'image/svg+xml; charset=utf-8',
+        '.txt': 'text/plain; charset=utf-8',
+    }
+
     def do_GET(self):
         if self.path.startswith("/api/"):
             self._proxy("GET")

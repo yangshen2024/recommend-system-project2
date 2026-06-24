@@ -2,7 +2,7 @@
 MIND News Recommendation Backend — Flask API Server
 
 Start: python backend/server.py
-Port: 5001
+Port: 8096
 
 API Endpoints:
   GET  /api/news              → Full news list (newsData format)
@@ -11,10 +11,16 @@ API Endpoints:
   GET  /api/categories        → Category list
   GET  /api/user/<user_id>    → User profile
   GET  /api/health            → Health check
+  GET  /api/version           → App version
   POST /api/recommend         → Generate baseline recommendations
   POST /api/rerank            → Re-rank recommendation results
   POST /api/feedback          → Record user click/behavior feedback
   GET  /api/users             → List available user IDs and profile summaries
+  POST /api/register          → Cold-start user registration
+  GET  /api/onboarding        → Get onboarding flow data
+  POST /api/onboarding        → Submit onboarding results
+  POST /api/recommend/coldstart → Cold-start recommendations
+  POST /api/feedback/coldstart  → Cold-start feedback
 """
 
 import json
@@ -93,6 +99,17 @@ def get_data(force_reload=False):
 @app.route("/api/health")
 def health():
     return jsonify({"status": "ok", "server": "MIND News Recommendation Backend"})
+
+
+@app.route("/api/version")
+def api_version():
+    """Return current app version from VERSION file"""
+    version_path = Path(__file__).resolve().parent.parent / "VERSION"
+    try:
+        ver = version_path.read_text().strip()
+    except Exception:
+        ver = "unknown"
+    return jsonify({"version": ver})
 
 
 # ─── Frontend Page Serving ─────────────────────────────────────────────
@@ -234,9 +251,78 @@ def _get_coldstart_manager():
 
 _user_behaviors = {}  # {user_id: {clicks: [], total_clicks: int, history: [...]}}
 
+# ─── Preset User Definitions ────────────────────────────────────────────
+_PRESET_USER_DEFS = {
+    "U_TECH": {
+        "preferred_leans": ["B"],
+        "liked_tags": ["technology", "ai", "science", "tech", "software",
+                       "data", "digital", "innovation", "research", "engineering"],
+        "categories": ["Technology", "Science"],
+        "min_clicks": 20,
+    },
+    "U_SPORTS": {
+        "preferred_leans": ["B"],
+        "liked_tags": ["sports", "game", "play", "football", "basketball",
+                       "athletic", "team", "league", "championship", "tournament"],
+        "categories": ["Sports"],
+        "min_clicks": 20,
+    },
+    "U_GENERAL": {
+        "preferred_leans": ["P", "B"],
+        "liked_tags": ["news", "politics", "world", "finance", "health",
+                       "policy", "economy", "global", "government", "society"],
+        "categories": ["News", "World", "Politics", "Finance"],
+        "min_clicks": 15,
+    },
+}
+
+
+def _init_preset_users():
+    """Initialize preset user profiles by selecting matching articles from DATA"""
+    data = get_data()
+    articles = data["articles"]
+
+    for uid, defn in _PRESET_USER_DEFS.items():
+        preferred_cats = defn["categories"]
+        liked_tags = defn["liked_tags"]
+        preferred_leans = defn["preferred_leans"]
+        min_clicks = defn["min_clicks"]
+
+        # Score articles: both category+tag match > category match > tag match
+        scored = []
+        for a in articles:
+            cat_match = a.get("category", "") in preferred_cats
+            tag_match = any(t in liked_tags for t in a.get("tags", []))
+            if cat_match and tag_match:
+                scored.append((a, 3))
+            elif cat_match:
+                scored.append((a, 2))
+            elif tag_match:
+                scored.append((a, 1))
+
+        # Sort by score descending, pick top min_clicks with some randomness
+        scored.sort(key=lambda x: (-x[1], random.random()))
+        clicked_articles = [a for a, _ in scored[:min_clicks]]
+        clicked_ids = [a["id"] for a in clicked_articles]
+
+        _user_behaviors[uid] = {
+            "user_id": uid,
+            "type": "existing",
+            "clicks": clicked_ids,
+            "total_clicks": len(clicked_ids),
+            "history": clicked_ids,
+            "preferred_leans": list(preferred_leans),
+            "liked_tags": list(liked_tags),
+        }
+        print(f"[Server] Initialized preset user {uid}: {len(clicked_ids)} clicks")
+
 
 def _ensure_user(user_id):
-    """Ensure user exists (simulate new user vs. existing user)"""
+    """Ensure user exists (preset user → predefined profile; otherwise simulate)"""
+    # Check if already exists (preset or previously initialized)
+    if user_id in _user_behaviors:
+        return _user_behaviors[user_id]
+
     if user_id not in _user_behaviors:
         # Randomly decide whether new or existing (75% probability existing)
         is_new = random.random() < 0.25
@@ -530,16 +616,32 @@ def recommend():
     Generate baseline recommendation results for a user.
 
     Request JSON:
-      { "user_id": "U12345", "top_k": 10 }
+      { "user_id": "U12345", "top_k": 10, "preset_user_id": "U_TECH" }
+
+    If preset_user_id is provided, use that preset user's profile for recommendations.
 
     Response:
-      { "user_id", "user_type", "baseline": [...], "total_available": int }
+      { "user_id", "user_type", "baseline": [...], "total_available": int, "using_preset": str|null }
     """
     body = request.get_json(silent=True) or {}
     user_id = body.get("user_id", "U12345")
     top_k = body.get("top_k", 10)
+    preset_user_id = body.get("preset_user_id", None)
 
-    user = _ensure_user(user_id)
+    # If a preset user is specified, use its behavior profile
+    using_preset = None
+    if preset_user_id and preset_user_id in _PRESET_USER_DEFS:
+        # Ensure preset user is initialized
+        if preset_user_id not in _user_behaviors:
+            _init_preset_users()
+        if preset_user_id in _user_behaviors:
+            user = _user_behaviors[preset_user_id]
+            using_preset = preset_user_id
+        else:
+            user = _ensure_user(user_id)
+    else:
+        user = _ensure_user(user_id)
+
     reranker = _get_reranker()
 
     # Build user profile for reranker
@@ -564,6 +666,9 @@ def recommend():
         "total_clicks": user.get("total_clicks", 0),
         "baseline": clean,
         "total_available": len(get_data()["articles"]),
+        "using_preset": using_preset,
+        "preferred_leans": user.get("preferred_leans", []),
+        "liked_tags": user.get("liked_tags", []),
         "timestamp": time.strftime("%Y-%m-%d %H:%M"),
     })
 
@@ -590,11 +695,19 @@ def rerank():
     user_id = body.get("user_id", "U12345")
     baseline_ids = body.get("baseline_ids", [])
     method = body.get("method", "entity_mmr")
-    lam = float(body.get("lam", 0.6))
+    lam = float(body.get("lam", 0.7))
     alpha = float(body.get("alpha", 0.5))
     top_k = body.get("top_k", 10)
+    preset_user_id = body.get("preset_user_id", None)
 
-    _ensure_user(user_id)
+    # Use preset user profile if specified
+    if preset_user_id and preset_user_id in _PRESET_USER_DEFS:
+        if preset_user_id not in _user_behaviors:
+            _init_preset_users()
+        user = _user_behaviors.get(preset_user_id)
+    else:
+        user = _ensure_user(user_id)
+
     reranker = _get_reranker()
     all_articles = get_data()["articles"]
     id_to_article = {a["id"]: a for a in all_articles}
@@ -625,6 +738,11 @@ def rerank():
                     if not k.startswith("_entities") and not k.startswith("_mind")}
             item["score"] = a.get("_reranked_score", a.get("_baseline_score", 0))
             item["rank"] = a.get("_reranked_rank", a.get("_rank", 0))
+            # Surface explanation fields
+            item["clusterName"] = a.get("_cluster_name", "")
+            item["clusterId"] = a.get("_cluster_group_id", -1)
+            item["diversityGain"] = a.get("_diversity_gain", 0)
+            item["reason"] = a.get("_reason", "")
             cleaned.append(item)
         return cleaned
 
@@ -636,6 +754,7 @@ def rerank():
         "baseline": clean_articles(baseline),
         "reranked": clean_articles(result["reranked"]),
         "coverage_stats": result["coverage_stats"],
+        "using_preset": preset_user_id,
         "timestamp": time.strftime("%Y-%m-%d %H:%M"),
     })
 
@@ -690,6 +809,116 @@ def list_users():
     })
 
 
+@app.route("/api/users/presets")
+def list_preset_users():
+    """List preset user profiles with their stats"""
+    # Ensure preset users are initialized
+    if not _user_behaviors:
+        _init_preset_users()
+
+    presets = []
+    for uid, defn in _PRESET_USER_DEFS.items():
+        user = _user_behaviors.get(uid, {})
+        presets.append({
+            "user_id": uid,
+            "name": uid,
+            "label": uid.replace("U_", "").replace("_", " ").title(),
+            "categories": defn["categories"],
+            "preferred_leans": defn["preferred_leans"],
+            "total_clicks": user.get("total_clicks", defn["min_clicks"]),
+            "clicked_ids": user.get("clicks", [])[:5],  # sample of clicked articles
+            "is_preset": True,
+        })
+
+    return jsonify({
+        "total": len(presets),
+        "presets": presets,
+    })
+
+
+@app.route("/api/articles/clusters")
+def get_article_clusters():
+    """Return cluster/group info for all articles"""
+    reranker = _get_reranker()
+    data = get_data()
+    articles = data["articles"]
+
+    # Build cluster mapping
+    clusters = {}
+    for a in articles:
+        gid = a.get("_cluster_group_id", -1)
+        if gid < 0:
+            continue
+        if gid not in clusters:
+            clusters[gid] = {"cluster_id": gid, "article_ids": [], "articles": []}
+        clusters[gid]["article_ids"].append(a["id"])
+        clusters[gid]["articles"].append({
+            "id": a["id"],
+            "title": a.get("title", ""),
+            "subtopic": a.get("subtopic", ""),
+            "source": a.get("source", ""),
+            "sourceLean": a.get("sourceLean", "B"),
+            "tags": a.get("tags", []),
+        })
+
+    # Only return clusters with 2+ articles
+    result = [v for v in clusters.values() if len(v["article_ids"]) >= 2]
+    result.sort(key=lambda c: -len(c["article_ids"]))
+
+    return jsonify({
+        "total_clusters": len(result),
+        "clusters": result,
+    })
+
+
+@app.route("/api/search")
+def search_articles():
+    """
+    Search/filter articles by keyword, category, subtopic, lean.
+
+    Query params:
+      q: keyword search (matches title, summary, tags)
+      category: filter by category
+      subtopic: filter by subtopic
+      lean: filter by sourceLean (P/B/T)
+      limit: max results (default 20)
+    """
+    data = get_data()
+    articles = data["articles"]
+
+    q = request.args.get("q", "").lower()
+    category = request.args.get("category", "").lower()
+    subtopic = request.args.get("subtopic", "").lower()
+    lean = request.args.get("lean", "").upper()
+    limit = request.args.get("limit", 20, type=int)
+
+    results = []
+    for a in articles:
+        if category and a.get("category", "").lower() != category:
+            continue
+        if subtopic and a.get("subtopic", "").lower() != subtopic:
+            continue
+        if lean and a.get("sourceLean", "") != lean:
+            continue
+        if q:
+            title = (a.get("title", "") or "").lower()
+            summary = (a.get("summary", "") or "").lower()
+            tags = " ".join(t.get("t", t) if isinstance(t, dict) else str(t) for t in a.get("tags", [])).lower()
+            if q not in title and q not in summary and q not in tags:
+                continue
+        results.append({k: v for k, v in a.items() if not k.startswith("_")})
+
+    results = results[:limit]
+    return jsonify({
+        "query": q,
+        "category": category or None,
+        "subtopic": subtopic or None,
+        "lean": lean or None,
+        "total": len(results),
+        "articles": results,
+    })
+
+
 # ─── Startup ───────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -699,6 +928,8 @@ if __name__ == "__main__":
     print("             /api/recommend, /api/rerank, /api/feedback")
     print("=" * 60)
     get_data()  # Preload data
+    # Initialize preset users
+    _init_preset_users()
     # Pre-initialize reranker
     _get_reranker()
     app.run(host="0.0.0.0", port=8096, debug=False)

@@ -1,0 +1,20 @@
+{
+  "name": "mind-news-backend-node",
+  "version": "1.0.0",
+  "description": "MIND News Recommendation Backend — Node.js rewrite",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {},
+  "keywords": ["news", "recommendation", "reranking", "mind"],
+  "license": "MIT"
+}

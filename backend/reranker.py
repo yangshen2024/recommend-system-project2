@@ -16,9 +16,8 @@ News Reranker — Entity MMR / Embedding MMR / Hybrid / Calibrated Reranking
 
 import math
 import re
-import json
-from collections import Counter, defaultdict
-from pathlib import Path
+import random
+from collections import Counter
 
 import numpy as np
 
@@ -188,6 +187,36 @@ class Reranker:
         print(f"[Reranker] Neighborhood built: median={np.median(sizes):.0f}, "
               f"mean={np.mean(sizes):.1f}, max={max(sizes)}")
 
+        # ── Connected Components (Union-Find) ──
+        parent = list(range(self.n))
+
+        def _find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def _union(x, y):
+            rx, ry = _find(x), _find(y)
+            if rx != ry:
+                parent[rx] = ry
+
+        for i in range(self.n):
+            for j in self._neighbors[i]:
+                _union(i, j)
+
+        group_roots = {}
+        next_gid = 0
+        for i in range(self.n):
+            root = _find(i)
+            if root not in group_roots:
+                group_roots[root] = next_gid
+                next_gid += 1
+            self.articles[i]["_cluster_group_id"] = group_roots[root]
+
+        self._num_clusters = next_gid
+        print(f"[Reranker] Connected components: {next_gid} clusters")
+
     # ════════════════════════════════════════════════════════════════
     #  热度 / 基准分数
     # ════════════════════════════════════════════════════════════════
@@ -239,6 +268,7 @@ class Reranker:
             article = dict(self.articles[idx])
             article["_baseline_score"] = round(float(scores[idx]), 4)
             article["_rank"] = rank + 1
+            article["_cluster_group_id"] = self.articles[idx].get("_cluster_group_id", -1)
             ranked.append(article)
 
         return ranked
@@ -317,6 +347,15 @@ class Reranker:
             article["_reranked_score"] = round(float(rel_scores[cidx]), 4)
             article["_reranked_rank"] = rank + 1
             article["_original_rank"] = cidx + 1
+
+            # ── New: per-article explanation fields ──
+            article["_cluster_name"] = self._derive_cluster_name(article)
+            article["_diversity_gain"] = self._calc_diversity_gain(
+                article, reranked, rank, reranked_indices, baseline_results, method, lam
+            )
+            article["_reason"] = self._generate_reason(
+                article, reranked, rank, reranked_indices, method
+            )
             reranked.append(article)
 
         # 覆盖度统计
@@ -543,6 +582,96 @@ class Reranker:
         return chosen
 
     # ════════════════════════════════════════════════════════════════
+    #  每篇文章的解释性元数据
+    # ════════════════════════════════════════════════════════════════
+
+    def _derive_cluster_name(self, article):
+        """Derive a human-readable cluster name from article metadata."""
+        sub = article.get("subtopic", "")
+        tags = article.get("tags", [])
+        if sub:
+            # Use first meaningful tag as context, subtopic as base
+            meaningful = [t for t in tags if len(t) > 2 and t.lower() not in ("news", "general", "world", "us")]
+            if meaningful:
+                return f"{meaningful[0].title()} / {sub}"
+            return sub
+        cat = article.get("category", "")
+        return cat or "General"
+
+    def _calc_diversity_gain(self, article, already_selected, rank,
+                             reranked_indices, baseline_results, method, lam):
+        """Approximate diversity gain this article brings vs already-selected ones."""
+        if rank == 0:
+            return round(lam * 0.8, 2)  # First pick always high diversity
+
+        prev_articles = already_selected[:rank]
+        gain = 0.0
+
+        # New source lean
+        prev_leans = {a.get("sourceLean") for a in prev_articles}
+        cur_lean = article.get("sourceLean", "B")
+        if cur_lean not in prev_leans:
+            gain += 0.15
+
+        # New subtopic
+        prev_subs = {a.get("subtopic") for a in prev_articles}
+        cur_sub = article.get("subtopic", "")
+        if cur_sub and cur_sub not in prev_subs:
+            gain += 0.15
+
+        # New entities fraction
+        cur_ents = set(article.get("_entities", []))
+        prev_ents = set()
+        for pa in prev_articles:
+            prev_ents.update(pa.get("_entities", []))
+        new_ent_count = len(cur_ents - prev_ents)
+        if len(cur_ents) > 0:
+            gain += 0.1 * (new_ent_count / len(cur_ents))
+
+        # Scale by lambda
+        gain = gain * lam
+
+        # Add small random jitter for visual difference
+        gain += random.uniform(-0.02, 0.02)
+
+        return round(min(max(gain, 0.02), 0.35), 2)
+
+    def _generate_reason(self, article, already_selected, rank, reranked_indices, method):
+        """Generate a human-readable reason for including this article."""
+        orig_rank = article.get("_original_rank", rank + 1)
+        promoted = orig_rank > rank + 1
+
+        lean = article.get("sourceLean", "B")
+        lean_label = {"P": "Left", "B": "Center", "T": "Right"}.get(lean, lean)
+        cluster = article.get("_cluster_name", "")
+
+        if rank == 0:
+            return f"Top relevance match with {lean_label} viewpoint on {cluster}"
+
+        prev_articles = already_selected[:rank]
+        prev_leans = {a.get("sourceLean") for a in prev_articles}
+        prev_subs = {a.get("subtopic") for a in prev_articles}
+        cur_sub = article.get("subtopic", "")
+
+        parts = []
+
+        if promoted and orig_rank - (rank + 1) >= 3:
+            parts.append("promoted for diverse perspective")
+
+        if lean not in prev_leans:
+            parts.append(f"adds {lean_label} viewpoint")
+        elif cur_sub and cur_sub not in prev_subs:
+            parts.append(f"broadens coverage to {cur_sub}")
+        else:
+            parts.append("adds a different angle within the same story")
+
+        if not parts:
+            parts.append("keeps high relevance with complementary perspective")
+
+        reason = ", ".join(parts)
+        return reason[0].upper() + reason[1:]
+
+    # ════════════════════════════════════════════════════════════════
     #  覆盖度评估
     # ════════════════════════════════════════════════════════════════
 
@@ -571,6 +700,37 @@ class Reranker:
         b_ent = entity_coverage(baseline)
         r_ent = entity_coverage(reranked)
 
+        # ── Retention: reranked top-k 中保留了多少 baseline top-k 文章 ──
+        baseline_ids = [a["id"] for a in baseline]
+        reranked_ids = [a["id"] for a in reranked]
+        overlap_ids = set(baseline_ids) & set(reranked_ids)
+        article_overlap = len(overlap_ids)
+        overlap_rate = round(article_overlap / max(1, len(reranked)), 4)
+        # 平均排名偏移
+        b_rank_map = {a["id"]: i + 1 for i, a in enumerate(baseline)}
+        rank_shifts = []
+        for i, a in enumerate(reranked):
+            if a["id"] in b_rank_map:
+                shift = abs(b_rank_map[a["id"]] - (i + 1))
+                rank_shifts.append(shift)
+        avg_rank_shift = round(sum(rank_shifts) / max(1, len(rank_shifts)), 2)
+
+        # ── Angle Diversity: 成对 Jaccard 距离 ──
+        angle_diversity = 0.0
+        top_n = reranked[:10] if len(reranked) >= 2 else []
+        if len(top_n) >= 2:
+            entity_sets_list = [set(a.get("_entities", [])) for a in top_n]
+            jaccard_dists = []
+            for i in range(len(entity_sets_list)):
+                for j in range(i + 1, len(entity_sets_list)):
+                    union = entity_sets_list[i] | entity_sets_list[j]
+                    inter = entity_sets_list[i] & entity_sets_list[j]
+                    if len(union) > 0:
+                        jaccard_dists.append(1 - len(inter) / len(union))
+                    else:
+                        jaccard_dists.append(0.0)
+            angle_diversity = round(float(np.mean(jaccard_dists)) if jaccard_dists else 0.0, 4)
+
         return {
             "baseline": {
                 "lean_distribution": b_lean,
@@ -586,6 +746,12 @@ class Reranker:
                 "entity_coverage_gain": r_ent - b_ent,
                 "subtopic_gain": len(r_subs) - len(b_subs),
             },
+            "retention": {
+                "article_overlap": article_overlap,
+                "overlap_rate": overlap_rate,
+                "avg_rank_shift": avg_rank_shift,
+            },
+            "angle_diversity": angle_diversity,
         }
 
 

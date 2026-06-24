@@ -13,6 +13,6 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY . .
 
 # Flask serves both API and static index.html
-EXPOSE 8096
+EXPOSE 5001
 
 CMD ["python", "backend/server.py"]
