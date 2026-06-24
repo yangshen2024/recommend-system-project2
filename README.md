@@ -2,7 +2,7 @@
 
 > *"Breaking your filter bubble, one headline at a time."*
 
-NewsPulse 是一个打破信息茧房的智能新闻推荐系统演示项目。它展示同一新闻事件在 **左派（Progressive）、中立（Center）、右派（Traditional）** 三种政治倾向下的不同报道框架，帮助用户建立多元化的信息消费习惯。
+NewsPulse 是一个打破信息茧房的智能新闻推荐系统演示项目。它展示同一新闻事件在不同政治倾向下的不同报道框架，帮助用户建立多元化的信息消费习惯。
 
 ---
 
