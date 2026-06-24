@@ -30,6 +30,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ── JSON parse error handler (must come BEFORE api routes) ──────────
+app.use((err, req, res, next) => {
+  if (err && err.type === 'entity.parse.failed') {
+    // Return 400 instead of letting it propagate as uncaught exception
+    return res.status(400).json({ error: 'Malformed JSON in request body' });
+  }
+  next(err);
+});
+
 // ─── Global state (lazy-initialised, similar to Python singletons) ────
 let _dataPromise = null;       // resolved once
 let _reranker = null;          // Reranker instance
@@ -805,6 +814,8 @@ app.use((err, _req, res, _next) => {
 //  Startup
 // ═══════════════════════════════════════════════════════════════════════
 
+let _server = null; // keep reference for graceful shutdown
+
 async function startup() {
   console.log('='.repeat(60));
   console.log('  MIND News Recommendation Backend (Node.js)');
@@ -816,7 +827,7 @@ async function startup() {
   initPresetUsers();
   await getReranker();
 
-  app.listen(PORT, '0.0.0.0', () => {
+  _server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`[Server] Listening on http://0.0.0.0:${PORT}`);
     console.log(`[Server] Endpoints: /api/news, /api/stats, /api/recommend, /api/rerank, /api/feedback`);
   });
@@ -826,3 +837,39 @@ startup().catch(err => {
   console.error('[Server] Fatal startup error:', err);
   process.exit(1);
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+//  Process-level safety nets (prevent silent crashes from stale healtcheck)
+// ═══════════════════════════════════════════════════════════════════════
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Server] Unhandled Rejection — Promise:', promise, '— Reason:', reason);
+  // Do NOT exit — keep serving.  The rejection is logged; the healtcheck
+  // will remain reachable unless the event-loop itself is blocked.
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[Server] Uncaught Exception:', err);
+  // Log & keep running.  Express's built-in error handler will serve 5xx
+  // for subsequent requests on the affected route.
+});
+
+// ── Graceful shutdown (SIGTERM / SIGINT) ───────────────────────────
+function shutdown(signal) {
+  console.log(`[Server] Received ${signal}, shutting down gracefully...`);
+  if (_server) {
+    _server.close(() => {
+      console.log('[Server] HTTP server closed.');
+      process.exit(0);
+    });
+    // Force exit after 5 s if connections are still open
+    setTimeout(() => {
+      console.error('[Server] Forced shutdown after timeout.');
+      process.exit(1);
+    }, 5000);
+  } else {
+    process.exit(0);
+  }
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
